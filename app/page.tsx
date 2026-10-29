@@ -465,29 +465,43 @@ export default function Page() {
             </p>
           </div>
 
-          {/* 4 Image-Based Course Cards in Deep Forest Green theme */}
+          {/* 4 Image-Based Course Cards in Light, Attractive Theme */}
           <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {courses.map((course) => {
               return (
                 <article
                   key={course.id}
-                  className="group flex flex-col justify-between rounded-2xl border border-[#DED5C5]/30 bg-[#12372A] text-[#FAF5EC] overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-[#E8A33D] hover:shadow-2xl"
+                  className="group flex flex-col justify-between rounded-2xl overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  style={{
+                    backgroundColor: course.cardBg,
+                    border: `1px solid ${course.borderColor}`,
+                  }}
                 >
                   {/* Top Image Banner */}
-                  <div className="relative h-32 sm:h-36 w-full overflow-hidden bg-[#0D281E]">
+                  <div className="relative h-32 sm:h-36 w-full overflow-hidden bg-black/5">
                     <img
                       src={course.image}
                       alt={course.name}
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#12372A] via-[#12372A]/30 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
 
                     {/* Top Badges */}
                     <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between gap-1.5">
-                      <span className="rounded-full bg-[#0D281E]/90 backdrop-blur-xs px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#E8A33D] border border-white/10">
+                      <span
+                        className="rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider shadow-2xs"
+                        style={{
+                          backgroundColor: course.pillBg,
+                          color: course.pillText,
+                          border: `1px solid ${course.borderColor}`,
+                        }}
+                      >
                         {course.eyebrow}
                       </span>
-                      <span className="rounded-full bg-[#E8A33D] px-2 py-0.5 text-[10px] font-extrabold text-[#12372A] shadow-xs">
+                      <span
+                        className="rounded-full px-2 py-0.5 text-[10px] font-extrabold text-white shadow-xs"
+                        style={{ backgroundColor: course.accentColor }}
+                      >
                         {course.formattedPrice}
                       </span>
                     </div>
@@ -497,60 +511,86 @@ export default function Page() {
                   <div className="flex flex-col flex-1 justify-between p-4 sm:p-4.5">
                     <div>
                       {/* Feature Tag */}
-                      <span className="text-[10px] font-semibold text-[#E8A33D] tracking-wide block">
+                      <span
+                        className="text-[10px] font-bold tracking-wide uppercase block"
+                        style={{ color: course.accentColor }}
+                      >
                         {course.tag}
                       </span>
 
-                      {/* Course Title */}
-                      <h3 className="mt-1 text-base sm:text-lg font-bold tracking-tight text-[#FAF5EC] group-hover:text-[#E8A33D] transition-colors">
+                      {/* Course Title - Dark Readable Text */}
+                      <h3 className="mt-1 text-base sm:text-lg font-bold tracking-tight text-[#12372A] transition-colors">
                         {course.name}
                       </h3>
 
                       {/* Subtitle / Schedule pill */}
-                      <div className="mt-1.5 flex items-center gap-2 text-[10px] text-[#FAF5EC]/70">
-                        <span className="inline-flex items-center gap-1">
-                          <Calendar className="size-3 text-[#FAF5EC]/60" />
+                      <div className="mt-1.5 flex items-center gap-2 text-[10px] text-[#68675D]">
+                        <span className="inline-flex items-center gap-1 font-medium">
+                          <Calendar className="size-3 text-[#68675D]" />
                           {course.schedulePill}
                         </span>
                         <span>•</span>
-                        <span className="inline-flex items-center gap-1 text-[#E8A33D] font-medium">
+                        <span
+                          className="inline-flex items-center gap-1 font-semibold"
+                          style={{ color: course.accentColor }}
+                        >
                           <Clock className="size-3" />
                           {course.doubtPill}
                         </span>
                       </div>
 
                       {/* Short Description */}
-                      <p className="mt-2 text-xs leading-relaxed text-[#FAF5EC]/80 line-clamp-2">
+                      <p className="mt-2 text-xs leading-relaxed text-[#4A5568] line-clamp-2">
                         {course.description}
                       </p>
 
                       {/* Compact Checkmark Highlights */}
-                      <ul className="mt-3 space-y-1.5 border-t border-white/10 pt-2.5">
+                      <ul
+                        className="mt-3 space-y-1.5 border-t pt-2.5"
+                        style={{ borderColor: `${course.borderColor}99` }}
+                      >
                         {course.highlights.slice(0, 3).map((highlight, idx) => (
-                          <li key={idx} className="flex items-start gap-1.5 text-[11px] text-[#FAF5EC]/85">
-                            <Check className="mt-0.5 size-3 shrink-0 text-[#E8A33D]" />
+                          <li key={idx} className="flex items-start gap-1.5 text-[11px] text-[#12372A] font-medium">
+                            <Check
+                              className="mt-0.5 size-3 shrink-0 stroke-[2.5]"
+                              style={{ color: course.accentColor }}
+                            />
                             <span className="line-clamp-1">{highlight}</span>
                           </li>
                         ))}
                       </ul>
 
                       {/* Compact Pricing Block */}
-                      <div className="mt-3 flex items-center justify-between rounded-lg bg-white/5 border border-white/10 px-3 py-1.5">
+                      <div
+                        className="mt-3 flex items-center justify-between rounded-lg bg-white/70 px-3 py-1.5"
+                        style={{ border: `1px solid ${course.borderColor}` }}
+                      >
                         <div className="flex items-baseline gap-1.5">
-                          <span className="text-base font-extrabold text-[#FAF5EC]">{course.formattedPrice}</span>
-                          <span className="text-[10px] text-[#FAF5EC]/60 line-through">{course.originalPrice}</span>
+                          <span className="text-base font-extrabold text-[#12372A]">{course.formattedPrice}</span>
+                          <span className="text-[10px] text-[#68675D] line-through">{course.originalPrice}</span>
                         </div>
-                        <span className="text-[10px] font-bold text-[#E8A33D] bg-[#E8A33D]/15 px-1.5 py-0.5 rounded border border-[#E8A33D]/30">
+                        <span
+                          className="text-[10px] font-bold px-1.5 py-0.5 rounded shadow-2xs"
+                          style={{
+                            backgroundColor: course.pillBg,
+                            color: course.pillText,
+                            border: `1px solid ${course.borderColor}`,
+                          }}
+                        >
                           {course.discount}
                         </span>
                       </div>
                     </div>
 
                     {/* Bottom Action Area */}
-                    <div className="mt-3.5 pt-2.5 border-t border-white/10 flex flex-col gap-1.5">
+                    <div
+                      className="mt-3.5 pt-2.5 border-t flex flex-col gap-1.5"
+                      style={{ borderColor: `${course.borderColor}99` }}
+                    >
                       <button
                         onClick={() => handleCourseSelect(course.name)}
-                        className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#FAF5EC] py-2 px-3 text-xs font-bold text-[#12372A] shadow-xs transition hover:bg-[#EBE3D5] active:scale-98"
+                        className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg py-2 px-3 text-xs font-bold text-white shadow-xs transition hover:brightness-105 active:scale-98"
+                        style={{ backgroundColor: course.buttonBg }}
                       >
                         <span>Enroll for {course.formattedPrice}</span>
                         <ArrowRight className="size-3.5" />
@@ -558,9 +598,10 @@ export default function Page() {
 
                       <button
                         onClick={() => handlePlaylistClick(course)}
-                        className="inline-flex w-full items-center justify-center gap-1 rounded-lg border border-white/15 py-1.5 px-2.5 text-[10px] font-semibold text-[#FAF5EC]/80 hover:bg-white/10 transition"
+                        className="inline-flex w-full items-center justify-center gap-1 rounded-lg bg-white/60 border py-1.5 px-2.5 text-[10px] font-semibold text-[#12372A] hover:bg-white transition"
+                        style={{ borderColor: course.borderColor }}
                       >
-                        <Play className="size-2.5 text-[#E8A33D]" />
+                        <Play className="size-2.5" style={{ color: course.accentColor }} />
                         <span>{course.youtubePlaylistUrl ? 'Watch Playlist' : 'View Playlist'}</span>
                       </button>
                     </div>
