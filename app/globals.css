@@ -1,0 +1,110 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  color-scheme: light;
+  --background: #FAF5EC;
+  --foreground: #12372A;
+  --card: #FFFDF8;
+  --card-foreground: #12372A;
+  --primary: #12372A;
+  --primary-navy: #12372A;
+  --primary-foreground: #FAF5EC;
+  --secondary: #F7F2E8;
+  --secondary-foreground: #12372A;
+  --muted: #F7F2E8;
+  --muted-foreground: #68675D;
+  --accent: #EBE3D5;
+  --accent-foreground: #12372A;
+  --border: #DED5C5;
+  --ring: #12372A;
+  --navy: #12372A;
+  --teal: #12372A;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background-color: #FAF5EC;
+  color: #12372A;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+::selection {
+  background: #EBE3D5;
+  color: #12372A;
+}
+
+.eyebrow {
+  color: #12372A;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: #12372A;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.field small {
+  font-weight: 400;
+  color: #68675D;
+}
+
+.field input, .field select, .field textarea {
+  width: 100%;
+  border: 1px solid #DED5C5;
+  border-radius: 0.75rem;
+  background: #FFFDF8;
+  padding: 0.85rem 1rem;
+  color: #12372A;
+  font-size: 0.925rem;
+  font-weight: 400;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: #12372A;
+  box-shadow: 0 0 0 3px rgba(18, 55, 42, 0.15);
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
