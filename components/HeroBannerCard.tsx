@@ -15,11 +15,17 @@ export function HeroBannerCard({ onEnquireClick }: HeroBannerCardProps) {
     {
       id: 'classroom-smartboard',
       image: '/image2.png',
+      badge: 'SSK CLASSROOM EXCELLENCE',
+      title: 'Interactive Smartboard Chemistry Lectures',
+      subtitle: 'Decoded reaction mechanisms, molecular orbital visualization & 1:1 guidance',
       courseTarget: 'Complete Chemistry Course',
     },
     {
       id: 'lab-demonstrations',
       image: '/image1.png',
+      badge: 'PRACTICAL CONCEPT LEARNING',
+      title: 'Experimental Clarity & Science Lab Demonstrations',
+      subtitle: 'Building strong foundations for Class 11th & 12th Board, NEET & JEE',
       courseTarget: 'Physical Chemistry',
     },
   ]

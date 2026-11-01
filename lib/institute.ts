@@ -31,6 +31,7 @@ export const instituteConfig = {
   shortName: 'SSK Coaching Classes',
   brandHeader: 'SSK PROFESSIONAL',
   brandSub: 'COACHING CLASSES',
+  logo: '/image14.png',
   tagline: 'Master Chemistry. Build Your Future.',
   admissions: 'Admissions Open',
   classes: 'Class 11th and 12th',

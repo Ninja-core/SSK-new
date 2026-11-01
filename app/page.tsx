@@ -1,15 +1,16 @@
 'use client'
 
 import { FormEvent, useState } from 'react'
+import Link from 'next/link'
 import {
   ArrowRight,
   ArrowUpRight,
-  Atom,
   BookOpen,
   Check,
   CheckCircle2,
   Clock,
   Calendar,
+  FileText,
   Flame,
   FlaskConical,
   GraduationCap,
@@ -227,14 +228,6 @@ export default function Page() {
     scrollTo('enquire')
   }
 
-  function handlePlaylistClick(course: typeof courses[0]) {
-    if (course.youtubePlaylistUrl) {
-      window.open(course.youtubePlaylistUrl, '_blank', 'noopener,noreferrer')
-    } else {
-      setPlaylistNotice(course.name)
-    }
-  }
-
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
@@ -262,8 +255,6 @@ export default function Page() {
   const navItems = [
     ['Courses', 'courses'],
     ['About Us', 'about'],
-    ['Faculty', 'faculty'],
-    ['Why Us', 'why-us'],
     ['Resources', 'resources'],
     ['Contact', 'contact'],
   ]
@@ -279,9 +270,11 @@ export default function Page() {
             className="group flex items-center gap-2.5 text-left transition-transform"
             aria-label="SSK Professional Coaching Classes Home"
           >
-            <span className="grid size-9 place-items-center rounded-full bg-[#12372A] text-[#FAF5EC] shadow-sm transition-transform group-hover:scale-105">
-              <Atom aria-hidden="true" className="size-5" />
-            </span>
+            <img
+              src="/image14.png"
+              alt="SSK Professional Logo"
+              className="h-10 sm:h-11 w-auto object-contain transition-transform group-hover:scale-105"
+            />
             <div className="leading-tight">
               <span className="block text-sm sm:text-[15px] font-extrabold tracking-tight text-[#12372A]">
                 {instituteConfig.brandHeader}
@@ -584,26 +577,17 @@ export default function Page() {
 
                     {/* Bottom Action Area */}
                     <div
-                      className="mt-3.5 pt-2.5 border-t flex flex-col gap-1.5"
+                      className="mt-3.5 pt-2.5 border-t"
                       style={{ borderColor: `${course.borderColor}99` }}
                     >
-                      <button
-                        onClick={() => handleCourseSelect(course.name)}
-                        className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg py-2 px-3 text-xs font-bold text-white shadow-xs transition hover:brightness-105 active:scale-98"
+                      <Link
+                        href={`/courses/${course.id}`}
+                        className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg py-2.5 px-3 text-xs font-bold text-white shadow-xs transition hover:brightness-105 active:scale-98"
                         style={{ backgroundColor: course.buttonBg }}
                       >
-                        <span>Enroll for {course.formattedPrice}</span>
+                        <span>Explore Course</span>
                         <ArrowRight className="size-3.5" />
-                      </button>
-
-                      <button
-                        onClick={() => handlePlaylistClick(course)}
-                        className="inline-flex w-full items-center justify-center gap-1 rounded-lg bg-white/60 border py-1.5 px-2.5 text-[10px] font-semibold text-[#12372A] hover:bg-white transition"
-                        style={{ borderColor: course.borderColor }}
-                      >
-                        <Play className="size-2.5" style={{ color: course.accentColor }} />
-                        <span>{course.youtubePlaylistUrl ? 'Watch Playlist' : 'View Playlist'}</span>
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 </article>
@@ -754,124 +738,117 @@ export default function Page() {
             </p>
           </div>
 
-          {/* 2-Column Balanced Layout: Prominent Educational Illustration on Left, SSK Chemistry Learning on Right */}
+          {/* 2-Column Balanced Layout matching Uploaded Mockup */}
           <div className="mt-12 grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-14">
-            {/* Left Side: Prominent, Natural Educational Illustration */}
+            {/* Left Side: Arched Chemistry Illustration with Integrated Badges */}
             <div className="flex flex-col items-center justify-center">
               <div className="relative w-full flex items-center justify-center">
-                {/* Subtle soft ambient glow behind the artwork */}
-                <div className="absolute inset-0 -m-6 rounded-full bg-[#EBE3D5]/50 blur-3xl pointer-events-none" />
-
                 <img
-                  src="/image8.jpg"
-                  alt="Students learning with academic guidance and roadmap at SSK Coaching Classes"
-                  className="relative z-10 w-full max-w-md sm:max-w-lg lg:max-w-xl h-auto object-contain transition-transform duration-500 hover:scale-[1.02]"
+                  src="/pathways-illustration.png"
+                  alt="SSK Chemistry Concept-First Pedagogy and 1:1 Doubt Solving with Senior Faculty"
+                  className="w-full max-w-md sm:max-w-lg lg:max-w-xl h-auto object-contain drop-shadow-md transition-transform duration-500 hover:scale-[1.02]"
                 />
-              </div>
-
-              {/* Floating Colorful Feature Pills below image */}
-              <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FFFDF8] border border-[#DED5C5] px-3.5 py-1 text-xs font-bold text-[#12372A] shadow-xs">
-                  <Sparkles className="size-3.5 text-[#E8A33D]" />
-                  <span>Concept-First Pedagogy</span>
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FFFDF8] border border-[#DED5C5] px-3.5 py-1 text-xs font-bold text-[#12372A] shadow-xs">
-                  <Check className="size-3.5 text-[#12372A]" />
-                  <span>1:1 Doubt Solving</span>
-                </span>
               </div>
             </div>
 
-            {/* Right Side: SSK Chemistry Learning Card */}
+            {/* Right Side: SSK Chemistry Learning Card with Clean, Concise Content */}
             <div>
-              <div className="relative overflow-hidden rounded-3xl border border-[#DED5C5] bg-[#FFFDF8] p-7 sm:p-9 shadow-[0_16px_50px_rgba(18,55,42,0.08)]">
-                {/* Top Accent Gradient Line */}
-                <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-[#12372A] via-[#6B8E78] to-[#E8A33D]" />
-
-                {/* Card Header with Icon, Title, and Vivid Badges */}
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                  <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-[#12372A] text-[#FAF5EC] shadow-md shadow-[#12372A]/20">
-                    <GraduationCap className="size-7" />
+              <div className="relative overflow-hidden rounded-3xl border border-[#DED5C5] bg-[#FFFDF8] p-6 sm:p-8 shadow-[0_12px_40px_rgba(18,55,42,0.08)]">
+                {/* Card Header with Yellow Icon, Title, and Badges */}
+                <div className="flex items-start gap-4">
+                  <span className="grid size-12 sm:size-14 shrink-0 place-items-center rounded-2xl bg-[#E8A33D] text-[#12372A] border border-[#12372A]/15 shadow-sm">
+                    <GraduationCap className="size-6 sm:size-7" />
                   </span>
                   <div>
-                    <h3 className="text-xl sm:text-2xl font-extrabold text-[#12372A] tracking-tight">
+                    <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#12372A] tracking-tight">
                       SSK Chemistry Learning
                     </h3>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      <span className="rounded-full bg-[#EBE3D5] border border-[#DED5C5] px-3 py-0.5 text-xs font-bold text-[#12372A]">
+                    <div className="mt-2 flex flex-wrap gap-1.5 sm:gap-2">
+                      <span className="rounded-full bg-[#FBE8A6] border border-[#E8A33D]/30 px-2.5 py-0.5 text-[11px] font-bold text-[#12372A]">
                         Classes 11th & 12th
                       </span>
-                      <span className="rounded-full bg-[#D1E2D7] border border-[#6B8E78]/30 px-3 py-0.5 text-xs font-bold text-[#12372A]">
+                      <span className="rounded-full bg-[#FCEEEA] border border-[#D9573B]/30 px-2.5 py-0.5 text-[11px] font-bold text-[#D9573B]">
                         Medical & Non-Medical
                       </span>
-                      <span className="rounded-full bg-[#FBE8A6] border border-[#E8A33D]/30 px-3 py-0.5 text-xs font-bold text-[#12372A]">
+                      <span className="rounded-full bg-[#12372A] px-2.5 py-0.5 text-[11px] font-bold text-white shadow-2xs">
                         Board • NEET • JEE
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Supporting Description */}
-                <p className="mt-5 text-sm sm:text-[15px] text-[#68675D] leading-relaxed">
+                {/* Concise Supporting Description */}
+                <p className="mt-4 text-xs sm:text-sm text-[#4A5568] leading-relaxed">
+                  Specialized chemistry tuition engineered for Class 11th and 12th students. Master physical derivations, organic mechanisms, and inorganic trends through clear, structured modules.
                 </p>
 
-                {/* Checkmark Feature Highlights */}
-                <ul className="mt-6 space-y-3 border-t border-[#DED5C5]/60 pt-5">
-                  <li className="flex items-start gap-3 text-xs sm:text-sm text-[#12372A] font-medium">
-                    <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-[#12372A] text-[#FAF5EC] shadow-xs">
-                      <Check className="size-3 stroke-[3]" />
+                {/* Short, Punchy Checkmark Feature Highlights */}
+                <ul className="mt-5 space-y-2.5 border-t border-[#DED5C5]/70 pt-4 text-xs sm:text-[13px] text-[#12372A]">
+                  <li className="flex items-start gap-2.5">
+                    <span className="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full bg-[#12372A] text-white">
+                      <Check className="size-2.5 stroke-[3]" />
                     </span>
-                    <span>Comprehensive Board, NEET & JEE Chemistry preparation across all chapters</span>
+                    <span><strong>Comprehensive Prep:</strong> Chapter-wise Board, NEET & JEE syllabus coverage</span>
                   </li>
-                  <li className="flex items-start gap-3 text-xs sm:text-sm text-[#12372A] font-medium">
-                    <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-[#12372A] text-[#FAF5EC] shadow-xs">
-                      <Check className="size-3 stroke-[3]" />
+                  <li className="flex items-start gap-2.5">
+                    <span className="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full bg-[#12372A] text-white">
+                      <Check className="size-2.5 stroke-[3]" />
                     </span>
-                    <span>Step-by-step reaction mechanisms & numerical problem algorithms</span>
+                    <span><strong>Reaction Mechanisms:</strong> Logical algorithms that eliminate rote memorization</span>
                   </li>
-                  <li className="flex items-start gap-3 text-xs sm:text-sm text-[#12372A] font-medium">
-                    <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-[#12372A] text-[#FAF5EC] shadow-xs">
-                      <Check className="size-3 stroke-[3]" />
+                  <li className="flex items-start gap-2.5">
+                    <span className="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full bg-[#12372A] text-white">
+                      <Check className="size-2.5 stroke-[3]" />
                     </span>
-                    <span>Daily Practice Problem (DPP) sheets, memory maps & high-yield NCERT decoding</span>
+                    <span><strong>DPP & Memory Maps:</strong> High-yield NCERT practice sheets for maximum retention</span>
                   </li>
-                  
-                 
+                  <li className="flex items-start gap-2.5">
+                    <span className="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full bg-[#12372A] text-white">
+                      <Check className="size-2.5 stroke-[3]" />
+                    </span>
+                    <span><strong>Sunday 1:1 Doubts:</strong> Dedicated personal interaction slots with senior faculty</span>
+                  </li>
                 </ul>
 
-                {/* 3 Stat Metrics */}
-                <div className="mt-6 grid grid-cols-3 gap-3 border-t border-[#DED5C5]/60 pt-5">
-                  <div className="rounded-xl border border-[#DED5C5] bg-[#F7F2E8] p-3 text-center">
-                    <span className="text-lg sm:text-xl font-extrabold text-[#12372A] block">100%</span>
+                {/* 3 Color-Coded Stat Metrics matching Mockup */}
+                <div className="mt-5 grid grid-cols-3 gap-2.5 border-t border-[#DED5C5]/70 pt-4">
+                  <div className="rounded-xl border border-[#E8A33D]/30 bg-[#FDF6E2] p-2.5 text-center">
+                    <span className="text-base sm:text-lg font-extrabold text-[#12372A] block leading-tight">100%</span>
                     <span className="text-[10px] sm:text-[11px] font-semibold text-[#68675D] block mt-0.5">Concept Clarity</span>
                   </div>
-                  <div className="rounded-xl border border-[#DED5C5] bg-[#F7F2E8] p-3 text-center">
-                    <span className="text-lg sm:text-xl font-extrabold text-[#12372A] block">11th & 12th</span>
+                  <div className="rounded-xl border border-[#D9573B]/30 bg-[#FCEEEA] p-2.5 text-center">
+                    <span className="text-base sm:text-lg font-extrabold text-[#12372A] block leading-tight">11th & 12th</span>
                     <span className="text-[10px] sm:text-[11px] font-semibold text-[#68675D] block mt-0.5">Medical / Non-Med</span>
                   </div>
-                  <div className="rounded-xl border border-[#DED5C5] bg-[#F7F2E8] p-3 text-center">
-                    <span className="text-lg sm:text-xl font-extrabold text-[#12372A] block">Sunday 1:1</span>
-                    <span className="text-[10px] sm:text-[11px] font-semibold text-[#68675D] block mt-0.5">Doubt Solving</span>
+                  <div className="rounded-xl border border-[#398568]/30 bg-[#E8F3EE] p-2.5 text-center">
+                    <span className="text-base sm:text-lg font-extrabold text-[#12372A] block leading-tight">Sunday</span>
+                    <span className="text-[10px] sm:text-[11px] font-semibold text-[#68675D] block mt-0.5">1:1 Doubts</span>
                   </div>
                 </div>
 
                 {/* Action CTA Buttons */}
-                <div className="mt-7 flex flex-col sm:flex-row items-center gap-3.5 border-t border-[#DED5C5]/60 pt-5">
+                <div className="mt-6 flex flex-col sm:flex-row items-center gap-3 border-t border-[#DED5C5]/70 pt-4">
                   <button
-                    onClick={() => scrollTo('courses')}
-                    className="inline-flex w-full sm:w-auto flex-1 items-center justify-center gap-2 rounded-xl bg-[#12372A] hover:bg-[#1C4B3A] py-3.5 px-6 text-xs sm:text-sm font-bold uppercase tracking-wider text-[#FAF5EC] shadow-md shadow-[#12372A]/25 transition-all hover:shadow-lg active:scale-98"
+                    onClick={() => scrollTo('enquire')}
+                    className="inline-flex w-full sm:w-auto flex-1 items-center justify-center gap-2 rounded-xl bg-[#12372A] hover:bg-[#1C4B3A] py-3 px-5 text-xs sm:text-sm font-bold text-white shadow-sm transition active:scale-98"
                   >
-                    <span>Explore Chemistry Courses</span>
-                    <ArrowRight className="size-4" />
+                    <span>Book a Free Demo Class</span>
+                    <ArrowRight className="size-3.5" />
                   </button>
 
                   <button
-                    onClick={() => scrollTo('enquire')}
-                    className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-[#DED5C5] bg-[#FFFDF8] hover:bg-[#F7F2E8] hover:border-[#12372A]/40 py-3.5 px-6 text-xs sm:text-sm font-bold text-[#12372A] shadow-2xs transition-all active:scale-98"
+                    onClick={() => scrollTo('courses')}
+                    className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-[#12372A] bg-white hover:bg-[#F7F2E8] py-3 px-5 text-xs sm:text-sm font-bold text-[#12372A] shadow-2xs transition active:scale-98"
                   >
-                    <span>Enquire for Admission</span>
+                    <span>Explore Courses</span>
                   </button>
                 </div>
+
+                {/* Limited Seats Guarantee Note */}
+                <p className="mt-3 text-center text-[11px] font-medium text-[#68675D] flex items-center justify-center gap-1.5">
+                  <span className="size-1.5 rounded-full bg-[#12372A]" />
+                  <span>Limited seats per batch to ensure individual 1:1 attention.</span>
+                </p>
               </div>
             </div>
           </div>
@@ -1369,9 +1346,13 @@ export default function Page() {
             {/* Institute Identity */}
             <div className="max-w-sm">
               <div className="flex items-center gap-2.5">
-                <span className="grid size-9 place-items-center rounded-full bg-[#1C4B3A] text-[#FAF5EC]">
-                  <Atom className="size-5" />
-                </span>
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/95 p-1 shadow-xs">
+                  <img
+                    src="/image14.png"
+                    alt="SSK Professional Logo"
+                    className="h-full w-full object-contain"
+                  />
+                </div>
                 <div>
                   <span className="block text-sm font-extrabold tracking-tight text-[#FAF5EC]">
                     {instituteConfig.name}
@@ -1402,21 +1383,22 @@ export default function Page() {
                       {instituteConfig.contactNumbers[1].label}
                     </a>
                   </span>
+
                 </div>
               </div>
             </div>
-
+              
             {/* Quick Links */}
             <div className="grid grid-cols-2 gap-8 text-xs sm:grid-cols-3">
               <div>
                 <p className="font-bold uppercase tracking-wider text-[#FAF5EC]">Navigation</p>
                 <div className="mt-3 flex flex-col gap-2 text-[#FAF5EC]/70">
                   <button onClick={() => scrollTo('courses')} className="text-left hover:text-[#FAF5EC] transition">Courses</button>
+                  <Link href="/courses/physical" className="text-left hover:text-[#FAF5EC] transition font-semibold text-[#E8A33D]">Study Material &amp; Notes</Link>
                   <button onClick={() => scrollTo('about')} className="text-left hover:text-[#FAF5EC] transition">About Us</button>
-                  <button onClick={() => scrollTo('faculty')} className="text-left hover:text-[#FAF5EC] transition">Faculty</button>
-                  <button onClick={() => scrollTo('why-us')} className="text-left hover:text-[#FAF5EC] transition">Why Us</button>
                   <button onClick={() => scrollTo('resources')} className="text-left hover:text-[#FAF5EC] transition">Resources</button>
                   <button onClick={() => scrollTo('enquire')} className="text-left hover:text-[#FAF5EC] transition">Enquire</button>
+                  <Link href="/owner/verify" className="text-left text-[#FAF5EC]/50 hover:text-[#FAF5EC] transition text-[11px] pt-1">Owner Portal</Link>
                 </div>
               </div>
 
