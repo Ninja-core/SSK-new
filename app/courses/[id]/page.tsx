@@ -25,6 +25,19 @@ export async function generateMetadata({ params }: CoursePageProps): Promise<Met
   return {
     title: `${course.name} - Notes & Study Material | SSK Professional Coaching Classes`,
     description: course.description,
+    icons: {
+      icon: [
+        { url: '/favicon.ico?v=2', sizes: 'any' },
+        { url: '/favicon-32x32.png?v=2', type: 'image/png', sizes: '32x32' },
+        { url: '/favicon-16x16.png?v=2', type: 'image/png', sizes: '16x16' },
+        { url: '/favicon.png?v=2', type: 'image/png', sizes: '512x512' },
+        { url: '/image14_raw.png?v=2', type: 'image/png' },
+      ],
+      shortcut: '/favicon.ico?v=2',
+      apple: [
+        { url: '/apple-touch-icon.png?v=2', sizes: '180x180', type: 'image/png' },
+      ],
+    },
   }
 }
 

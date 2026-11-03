@@ -393,324 +393,259 @@ export function CourseStudyMaterialSection({
           </div>
         )}
 
-        {/* Main PDF Study Material Showcase Card */}
-        <div className="mt-8 rounded-3xl border border-[#DED5C5] bg-[#FFFDF8] p-6 sm:p-9 shadow-[0_12px_40px_rgba(18,55,42,0.06)]">
-          <div className="grid gap-8 lg:grid-cols-[1.1fr_1.3fr] lg:gap-12 items-start">
-            {/* Left Column: Material Info & Details */}
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-[#E8F0FE] border border-[#C7D9FA] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#2C4F9E]">
-                  {activeMaterial.subject}
+        {/* Main PDF Study Material Showcase Card - Expanded Full Width */}
+        <div className="mt-8 rounded-3xl border border-[#DED5C5] bg-[#FFFDF8] p-6 sm:p-9 shadow-[0_12px_40px_rgba(18,55,42,0.06)] max-w-4xl mx-auto">
+          <div>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#DED5C5]/70 pb-4">
+              <div className="flex items-center gap-2.5">
+                <span className="grid size-9 place-items-center rounded-xl bg-[#FAF5EC] border border-[#DED5C5] text-[#12372A]">
+                  <FileText className="size-5 text-[#12372A]" />
                 </span>
-                <span className="rounded-full bg-[#FDF6E2] border border-[#E8A33D]/30 px-2.5 py-0.5 text-[10px] font-bold text-[#12372A]">
-                  {activeMaterial.badge}
-                </span>
-              </div>
-
-              <h3 className="mt-3 text-xl sm:text-2xl font-extrabold text-[#12372A] tracking-tight">
-                {activeMaterial.title}
-              </h3>
-
-              <p className="mt-3 text-xs sm:text-sm text-[#4A5568] leading-relaxed">
-                {activeMaterial.description}
-              </p>
-
-              {/* Document Meta Chips */}
-              <div className="mt-5 grid grid-cols-3 gap-2.5 border-y border-[#DED5C5]/70 py-3.5 text-center text-xs">
-                <div className="rounded-xl bg-[#F7F2E8] p-2">
-                  <span className="text-[10px] text-[#68675D] block font-medium">Pages</span>
-                  <span className="font-bold text-[#12372A]">{activeMaterial.pageCount} Pages</span>
-                </div>
-                <div className="rounded-xl bg-[#F7F2E8] p-2">
-                  <span className="text-[10px] text-[#68675D] block font-medium">Format</span>
-                  <span className="font-bold text-[#12372A]">Verified PDF</span>
-                </div>
-                <div className="rounded-xl bg-[#F7F2E8] p-2">
-                  <span className="text-[10px] text-[#68675D] block font-medium">Demonstration</span>
-                  <span className="font-bold text-[#12372A]">₹{activeMaterial.demoPrice} Only</span>
+                <div>
+                  <span className="font-bold text-sm sm:text-base text-[#12372A] block leading-tight">
+                    {activeMaterial.fileName}
+                  </span>
+                  <span className="text-[11px] text-[#68675D]">
+                    {activeMaterial.title} • {activeMaterial.pageCount} Pages • Verified PDF
+                  </span>
                 </div>
               </div>
 
-              {/* Topics Covered In This Chapter */}
-              <div className="mt-5">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[#12372A]">
-                  Key Syllabus Topics Included
-                </h4>
-                <ul className="mt-3 space-y-2">
-                  {activeMaterial.topics.slice(0, 5).map((topic, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-xs text-[#12372A] font-medium">
-                      <CheckCircle2 className="size-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>{topic}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <div className="flex items-center gap-2">
+                {paymentStatus === 'verified' && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 border border-emerald-300 px-3 py-1 text-xs font-bold text-emerald-800">
+                    <CheckCircle2 className="size-3.5 text-emerald-600" />
+                    <span>Unlocked</span>
+                  </span>
+                )}
 
-              {/* Pricing & Current Status Card */}
-              <div className="mt-6 rounded-2xl border border-[#DED5C5] bg-[#F7F2E8] p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-[11px] font-semibold text-[#68675D] block">Current Demonstration Fee</span>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-extrabold text-[#12372A]">₹{activeMaterial.demoPrice}</span>
-                      <span className="text-xs text-[#68675D] line-through">₹{activeMaterial.standardPrice}</span>
-                      <span className="rounded-md bg-[#E8A33D]/20 px-1.5 py-0.5 text-[10px] font-bold text-[#12372A]">
-                        99% OFF DEMO
-                      </span>
-                    </div>
-                  </div>
+                {paymentStatus === 'pending' && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 border border-amber-300 px-3 py-1 text-xs font-bold text-amber-800">
+                    <Clock className="size-3.5 text-amber-600 animate-spin" />
+                    <span>Verification Pending</span>
+                  </span>
+                )}
 
-                  {/* Status Pill Badge */}
-                  <div>
-                    {paymentStatus === 'verified' && (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 border border-emerald-300 px-3 py-1 text-xs font-bold text-emerald-800">
-                        <CheckCircle2 className="size-3.5 text-emerald-600" />
-                        <span>Unlocked</span>
-                      </span>
-                    )}
-
-                    {paymentStatus === 'pending' && (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 border border-amber-300 px-3 py-1 text-xs font-bold text-amber-800">
-                        <Clock className="size-3.5 text-amber-600 animate-spin" />
-                        <span>Verification Pending</span>
-                      </span>
-                    )}
-
-                    {(paymentStatus === 'locked' || paymentStatus === 'failed') && (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-slate-300 px-3 py-1 text-xs font-bold text-slate-700">
-                        <Lock className="size-3.5 text-slate-500" />
-                        <span>Locked</span>
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Owner Verification Link */}
-              <div className="mt-3 flex items-center justify-between text-[11px] text-[#68675D] px-1">
-                <span>SSK Coaching Payment Protection</span>
-                <button
-                  onClick={() => setShowOwnerModal(true)}
-                  className="inline-flex items-center gap-1 text-[#12372A] font-semibold hover:underline"
-                >
-                  <KeyRound className="size-3 text-[#12372A]" />
-                  <span>Owner Verification Portal</span>
-                </button>
+                {(paymentStatus === 'locked' || paymentStatus === 'failed') && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-slate-300 px-3 py-1 text-xs font-bold text-slate-700">
+                    <Lock className="size-3.5 text-slate-500" />
+                    <span>Locked</span>
+                  </span>
+                )}
               </div>
             </div>
 
-            {/* Right Column: Professional PDF Preview & Action Area */}
-            <div className="flex flex-col justify-between rounded-2xl border border-[#DED5C5] bg-white p-5 sm:p-7 shadow-sm">
-              <div>
-                <div className="flex items-center justify-between border-b border-[#DED5C5]/70 pb-3">
-                  <div className="flex items-center gap-2">
-                    <FileText className="size-5 text-[#12372A]" />
-                    <span className="font-bold text-sm text-[#12372A]">{activeMaterial.fileName}</span>
-                  </div>
-                  <span className="text-[11px] font-medium text-[#68675D]">PDF Preview Interface</span>
+            {/* ---------------- STATE 1: LOCKED ---------------- */}
+            {paymentStatus === 'locked' && (
+              <div className="mt-6 relative overflow-hidden rounded-2xl border-2 border-dashed border-[#DED5C5] bg-[#FAF5EC]/70 p-7 sm:p-10 text-center">
+                <div className="mx-auto grid size-16 place-items-center rounded-full bg-[#12372A] text-[#FAF5EC] shadow-md">
+                  <Lock className="size-8 text-[#E8A33D]" />
                 </div>
 
-                {/* ---------------- STATE 1: LOCKED ---------------- */}
-                {paymentStatus === 'locked' && (
-                  <div className="mt-5 relative overflow-hidden rounded-2xl border-2 border-dashed border-[#DED5C5] bg-[#FAF5EC]/70 p-6 sm:p-8 text-center">
-                    <div className="mx-auto grid size-16 place-items-center rounded-full bg-[#12372A] text-[#FAF5EC] shadow-md">
-                      <Lock className="size-8 text-[#E8A33D]" />
+                <h4 className="mt-4 text-xl font-bold text-[#12372A]">
+                  PDF Material Locked
+                </h4>
+                <p className="mt-1.5 text-xs sm:text-sm text-[#68675D] max-w-md mx-auto leading-relaxed">
+                  Your study material is locked. Complete the ₹1 payment to access this PDF.
+                </p>
+
+                {/* Preview Page Snippets */}
+                <div className="mt-6 space-y-2.5 text-left bg-white/90 rounded-2xl p-5 border border-[#DED5C5]/70 text-xs sm:text-sm max-w-2xl mx-auto shadow-2xs">
+                  {activeMaterial.previewHighlights.map((hl, i) => (
+                    <div key={i} className="flex items-start gap-2.5 text-[#4A5568]">
+                      <Sparkles className="size-4 text-[#E8A33D] shrink-0 mt-0.5" />
+                      <span><strong className="text-[#12372A]">{hl.title}:</strong> {hl.detail}</span>
                     </div>
+                  ))}
+                </div>
 
-                    <h4 className="mt-4 text-lg font-bold text-[#12372A]">
-                      PDF Material Locked
-                    </h4>
-                    <p className="mt-1.5 text-xs text-[#68675D] max-w-sm mx-auto leading-relaxed">
-                      Your study material is locked. Complete the ₹1 payment to access this PDF.
-                    </p>
-
-                    {/* Preview Page Snippets */}
-                    <div className="mt-5 space-y-2 text-left bg-white/80 rounded-xl p-3.5 border border-[#DED5C5]/60 text-xs">
-                      {activeMaterial.previewHighlights.map((hl, i) => (
-                        <div key={i} className="flex items-start gap-2 text-[#4A5568]">
-                          <Sparkles className="size-3.5 text-[#E8A33D] shrink-0 mt-0.5" />
-                          <span><strong>{hl.title}:</strong> {hl.detail}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Prominent Payment Button */}
-                    <div className="mt-6 flex flex-col items-center gap-2">
-                      <button
-                        onClick={handlePayButtonClick}
-                        disabled={isInitiating}
-                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#12372A] hover:bg-[#1C4B3A] py-3.5 px-6 text-sm font-bold uppercase tracking-wider text-[#FAF5EC] shadow-md transition-all hover:shadow-lg active:scale-98 disabled:opacity-75"
-                      >
-                        {isInitiating ? (
-                          <>
-                            <RefreshCw className="size-4 animate-spin" />
-                            <span>Connecting to Razorpay...</span>
-                          </>
-                        ) : (
-                          <>
-                            <CreditCard className="size-4 text-[#E8A33D]" />
-                            <span>Pay ₹{activeMaterial.demoPrice} to Unlock PDF</span>
-                            <ArrowRight className="size-4" />
-                          </>
-                        )}
-                      </button>
-
-                      <div className="flex items-center gap-1.5 text-[11px] text-[#68675D]">
-                        <ShieldCheck className="size-3.5 text-emerald-600" />
-                        <span>Redirects to Razorpay: razorpay.me/@sskcoaching</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* ---------------- STATE 2: PAYMENT PENDING ---------------- */}
-                {paymentStatus === 'pending' && (
-                  <div className="mt-5 rounded-2xl border-2 border-amber-300 bg-amber-50/60 p-6 sm:p-7 text-center">
-                    <div className="mx-auto grid size-14 place-items-center rounded-full bg-amber-500 text-white shadow-md animate-pulse">
-                      <Clock className="size-7" />
-                    </div>
-
-                    <h4 className="mt-3.5 text-base sm:text-lg font-bold text-amber-900">
-                      Payment initiated. Waiting for confirmation.
-                    </h4>
-                    <p className="mt-1 text-xs text-amber-800 max-w-md mx-auto leading-relaxed">
-                      Your payment request has been recorded. Please complete the ₹1 payment on Razorpay. The website owner confirms transactions before unlocking.
-                    </p>
-
-                    {activeRequestId && (
-                      <div className="mt-3 inline-block rounded-lg bg-white/80 border border-amber-200 px-3 py-1 text-[11px] font-mono text-amber-900">
-                        Request ID: <strong>{activeRequestId}</strong>
-                      </div>
+                {/* Prominent Payment Button */}
+                <div className="mt-7 flex flex-col items-center gap-2 max-w-md mx-auto">
+                  <button
+                    onClick={handlePayButtonClick}
+                    disabled={isInitiating}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#12372A] hover:bg-[#1C4B3A] py-3.5 px-6 text-sm font-bold uppercase tracking-wider text-[#FAF5EC] shadow-md transition-all hover:shadow-lg active:scale-98 disabled:opacity-75"
+                  >
+                    {isInitiating ? (
+                      <>
+                        <RefreshCw className="size-4 animate-spin" />
+                        <span>Connecting to Razorpay...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="size-4 text-[#E8A33D]" />
+                        <span>Pay ₹{activeMaterial.demoPrice} to Unlock PDF</span>
+                        <ArrowRight className="size-4" />
+                      </>
                     )}
+                  </button>
 
-                    <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-2">
-                      <button
-                        onClick={() => activeRequestId && checkServerPaymentStatus(activeRequestId, false)}
-                        disabled={isCheckingStatus}
-                        className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-[#12372A] hover:bg-[#1C4B3A] px-4 py-2.5 text-xs font-bold text-white shadow-xs transition"
-                      >
-                        <RefreshCw className={`size-3.5 ${isCheckingStatus ? 'animate-spin' : ''}`} />
-                        <span>{isCheckingStatus ? 'Checking...' : 'Check Status'}</span>
-                      </button>
+                  <div className="flex items-center gap-1.5 text-[11px] text-[#68675D]">
+                    <ShieldCheck className="size-3.5 text-emerald-600" />
+                    <span>Redirects to Razorpay: razorpay.me/@sskcoaching</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
-                      <a
-                        href={razorpayConfig.paymentProfileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-white px-4 py-2.5 text-xs font-bold text-amber-900 hover:bg-amber-100/50 transition"
-                      >
-                        <span>Re-open Razorpay Link</span>
-                        <ExternalLink className="size-3" />
-                      </a>
+            {/* ---------------- STATE 2: PAYMENT PENDING ---------------- */}
+            {paymentStatus === 'pending' && (
+              <div className="mt-6 rounded-2xl border-2 border-amber-300 bg-amber-50/60 p-7 sm:p-9 text-center">
+                <div className="mx-auto grid size-16 place-items-center rounded-full bg-amber-500 text-white shadow-md animate-pulse">
+                  <Clock className="size-8" />
+                </div>
 
-                      <button
-                        onClick={handleResetPayment}
-                        className="inline-flex w-full sm:w-auto items-center justify-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
-                      >
-                        <span>Cancel</span>
-                      </button>
-                    </div>
+                <h4 className="mt-4 text-lg sm:text-xl font-bold text-amber-900">
+                  Payment initiated. Waiting for confirmation.
+                </h4>
+                <p className="mt-1.5 text-xs sm:text-sm text-amber-800 max-w-lg mx-auto leading-relaxed">
+                  Your payment request has been recorded. Please complete the ₹1 payment on Razorpay. The website owner confirms transactions before unlocking.
+                </p>
 
-                    <p className="mt-3 text-[11px] text-amber-700">
-                      Auto-checking every 5 seconds. You do not need to enter any payment ID.
-                    </p>
+                {activeRequestId && (
+                  <div className="mt-4 inline-block rounded-xl bg-white/90 border border-amber-200 px-4 py-1.5 text-xs font-mono text-amber-900 shadow-2xs">
+                    Request Reference ID: <strong>{activeRequestId}</strong>
                   </div>
                 )}
 
-                {/* ---------------- STATE 3: PAYMENT FAILED ---------------- */}
-                {paymentStatus === 'failed' && (
-                  <div className="mt-5 rounded-2xl border-2 border-rose-200 bg-rose-50/70 p-6 text-center">
-                    <div className="mx-auto grid size-14 place-items-center rounded-full bg-rose-600 text-white shadow-md">
-                      <AlertCircle className="size-7" />
+                <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <button
+                    onClick={() => activeRequestId && checkServerPaymentStatus(activeRequestId, false)}
+                    disabled={isCheckingStatus}
+                    className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-[#12372A] hover:bg-[#1C4B3A] px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs transition"
+                  >
+                    <RefreshCw className={`size-3.5 ${isCheckingStatus ? 'animate-spin' : ''}`} />
+                    <span>{isCheckingStatus ? 'Checking Status...' : 'Check Status'}</span>
+                  </button>
+
+                  <a
+                    href={razorpayConfig.paymentProfileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-amber-300 bg-white px-5 py-2.5 text-xs sm:text-sm font-bold text-amber-900 hover:bg-amber-100/50 transition shadow-2xs"
+                  >
+                    <span>Re-open Razorpay Link</span>
+                    <ExternalLink className="size-3.5" />
+                  </a>
+
+                  <button
+                    onClick={handleResetPayment}
+                    className="inline-flex w-full sm:w-auto items-center justify-center gap-1 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
+                  >
+                    <span>Cancel</span>
+                  </button>
+                </div>
+
+                <p className="mt-4 text-xs text-amber-700">
+                  Auto-checking every 5 seconds. You do not need to enter any payment ID.
+                </p>
+              </div>
+            )}
+
+            {/* ---------------- STATE 3: PAYMENT FAILED ---------------- */}
+            {paymentStatus === 'failed' && (
+              <div className="mt-6 rounded-2xl border-2 border-rose-200 bg-rose-50/70 p-7 text-center">
+                <div className="mx-auto grid size-16 place-items-center rounded-full bg-rose-600 text-white shadow-md">
+                  <AlertCircle className="size-8" />
+                </div>
+
+                <h4 className="mt-4 text-lg sm:text-xl font-bold text-rose-900">
+                  Payment could not be confirmed. Please try again.
+                </h4>
+                <p className="mt-1.5 text-xs sm:text-sm text-rose-700 max-w-md mx-auto leading-relaxed">
+                  {errorMessage || 'The payment could not be verified against the Razorpay account. Access to this study material remains locked.'}
+                </p>
+
+                <div className="mt-6 flex justify-center gap-3">
+                  <button
+                    onClick={handleResetPayment}
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#12372A] hover:bg-[#1C4B3A] px-6 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs transition"
+                  >
+                    <RefreshCw className="size-3.5" />
+                    <span>Retry Payment (₹1)</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ---------------- STATE 4: PAYMENT VERIFIED & UNLOCKED ---------------- */}
+            {paymentStatus === 'verified' && isUnlocked && (
+              <div className="mt-6 space-y-4">
+                <div className="rounded-2xl border border-emerald-300 bg-emerald-50/80 p-5 sm:p-6">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-3.5">
+                      <span className="grid size-12 place-items-center rounded-2xl bg-emerald-600 text-white shadow-xs">
+                        <Unlock className="size-6" />
+                      </span>
+                      <div>
+                        <p className="text-base font-bold text-emerald-950">
+                          Payment Successful! Your study material is now unlocked.
+                        </p>
+                        <p className="text-xs text-emerald-800 font-medium mt-0.5">
+                          {activeMaterial.title} • Verified Complete Access
+                        </p>
+                      </div>
                     </div>
 
-                    <h4 className="mt-3.5 text-base sm:text-lg font-bold text-rose-900">
-                      Payment could not be confirmed. Please try again.
-                    </h4>
-                    <p className="mt-1 text-xs text-rose-700 max-w-md mx-auto leading-relaxed">
-                      {errorMessage || 'The payment could not be verified against the Razorpay account. Access to this study material remains locked.'}
-                    </p>
-
-                    <div className="mt-5 flex justify-center gap-3">
+                    {/* Action Buttons: View PDF & Download PDF */}
+                    <div className="flex items-center gap-2.5 w-full sm:w-auto">
                       <button
-                        onClick={handleResetPayment}
-                        className="inline-flex items-center gap-1.5 rounded-xl bg-[#12372A] hover:bg-[#1C4B3A] px-5 py-2.5 text-xs font-bold text-white shadow-xs transition"
+                        onClick={() => setViewPdfInline(!viewPdfInline)}
+                        className="inline-flex flex-1 sm:flex-none items-center justify-center gap-1.5 rounded-xl border border-[#12372A] bg-white px-5 py-2.5 text-xs sm:text-sm font-bold text-[#12372A] hover:bg-[#F7F2E8] transition shadow-2xs"
                       >
-                        <RefreshCw className="size-3.5" />
-                        <span>Retry Payment (₹1)</span>
+                        <Eye className="size-4" />
+                        <span>{viewPdfInline ? 'Hide Viewer' : 'View PDF'}</span>
+                      </button>
+
+                      <button
+                        onClick={handleDownloadPdf}
+                        className="inline-flex flex-1 sm:flex-none items-center justify-center gap-1.5 rounded-xl bg-[#12372A] hover:bg-[#1C4B3A] px-5 py-2.5 text-xs sm:text-sm font-bold text-[#FAF5EC] shadow-xs transition"
+                      >
+                        <Download className="size-4" />
+                        <span>Download PDF</span>
                       </button>
                     </div>
                   </div>
-                )}
+                </div>
 
-                {/* ---------------- STATE 4: PAYMENT VERIFIED & UNLOCKED ---------------- */}
-                {paymentStatus === 'verified' && isUnlocked && (
-                  <div className="mt-5 space-y-4">
-                    <div className="rounded-2xl border border-emerald-300 bg-emerald-50/80 p-5">
-                      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                          <span className="grid size-11 place-items-center rounded-xl bg-emerald-600 text-white shadow-xs">
-                            <Unlock className="size-5" />
-                          </span>
-                          <div>
-                            <p className="text-sm font-bold text-emerald-950">
-                              Payment Successful! Your study material is now unlocked.
-                            </p>
-                            <p className="text-xs text-emerald-800 font-medium">
-                              {activeMaterial.title} • Verified Complete Access
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Action Buttons: View PDF & Download PDF */}
-                        <div className="flex items-center gap-2 w-full sm:w-auto">
-                          <button
-                            onClick={() => setViewPdfInline(!viewPdfInline)}
-                            className="inline-flex flex-1 sm:flex-none items-center justify-center gap-1.5 rounded-xl border border-[#12372A] bg-white px-4 py-2.5 text-xs font-bold text-[#12372A] hover:bg-[#F7F2E8] transition shadow-2xs"
-                          >
-                            <Eye className="size-3.5" />
-                            <span>{viewPdfInline ? 'Hide Viewer' : 'View PDF'}</span>
-                          </button>
-
-                          <button
-                            onClick={handleDownloadPdf}
-                            className="inline-flex flex-1 sm:flex-none items-center justify-center gap-1.5 rounded-xl bg-[#12372A] hover:bg-[#1C4B3A] px-4 py-2.5 text-xs font-bold text-[#FAF5EC] shadow-xs transition"
-                          >
-                            <Download className="size-3.5" />
-                            <span>Download PDF</span>
-                          </button>
-                        </div>
-                      </div>
+                {/* Embedded Inline Viewer (iframe) */}
+                {viewPdfInline && paymentToken && (
+                  <div className="overflow-hidden rounded-2xl border border-[#DED5C5] bg-[#FAF5EC] shadow-sm">
+                    <div className="flex items-center justify-between bg-[#12372A] px-5 py-3 text-white text-xs sm:text-sm">
+                      <span className="font-semibold">Interactive Document Viewer: {activeMaterial.title}</span>
+                      <button
+                        onClick={() =>
+                          window.open(
+                            `/api/material/view?id=${activeMaterial.id}&token=${encodeURIComponent(paymentToken)}`,
+                            '_blank'
+                          )
+                        }
+                        className="inline-flex items-center gap-1 text-xs font-bold text-[#E8A33D] hover:underline"
+                      >
+                        <span>Open In Fullscreen</span>
+                        <ExternalLink className="size-3.5" />
+                      </button>
                     </div>
-
-                    {/* Embedded Inline Viewer (iframe) */}
-                    {viewPdfInline && paymentToken && (
-                      <div className="overflow-hidden rounded-2xl border border-[#DED5C5] bg-[#FAF5EC]">
-                        <div className="flex items-center justify-between bg-[#12372A] px-4 py-2.5 text-white text-xs">
-                          <span className="font-semibold">Interactive Document Viewer: {activeMaterial.title}</span>
-                          <button
-                            onClick={() =>
-                              window.open(
-                                `/api/material/view?id=${activeMaterial.id}&token=${encodeURIComponent(paymentToken)}`,
-                                '_blank'
-                              )
-                            }
-                            className="inline-flex items-center gap-1 text-[11px] font-bold text-[#E8A33D] hover:underline"
-                          >
-                            <span>Open In Fullscreen</span>
-                            <ExternalLink className="size-3" />
-                          </button>
-                        </div>
-                        <iframe
-                          src={`/api/material/view?id=${activeMaterial.id}&token=${encodeURIComponent(paymentToken)}#toolbar=1`}
-                          title={activeMaterial.title}
-                          className="h-[480px] w-full border-0 bg-white"
-                        />
-                      </div>
-                    )}
+                    <iframe
+                      src={`/api/material/view?id=${activeMaterial.id}&token=${encodeURIComponent(paymentToken)}#toolbar=1`}
+                      title={activeMaterial.title}
+                      className="h-[520px] w-full border-0 bg-white"
+                    />
                   </div>
                 )}
               </div>
+            )}
+
+            {/* Bottom bar with Owner Verification link */}
+            <div className="mt-6 pt-4 border-t border-[#DED5C5]/60 flex items-center justify-between text-[11px] text-[#68675D]">
+              <span>SSK Coaching Payment Protection</span>
+              <button
+                onClick={() => setShowOwnerModal(true)}
+                className="inline-flex items-center gap-1 text-[#12372A] font-semibold hover:underline"
+              >
+                <KeyRound className="size-3 text-[#12372A]" />
+                <span>Owner Verification Portal</span>
+              </button>
             </div>
           </div>
         </div>

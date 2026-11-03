@@ -15,8 +15,6 @@ export function HeroBannerCard({ onEnquireClick }: HeroBannerCardProps) {
     {
       id: 'classroom-smartboard',
       image: '/image2.png',
-      badge: 'SSK CLASSROOM EXCELLENCE',
-      title: 'Interactive Smartboard Chemistry Lectures',
       subtitle: 'Decoded reaction mechanisms, molecular orbital visualization & 1:1 guidance',
       courseTarget: 'Complete Chemistry Course',
     },
