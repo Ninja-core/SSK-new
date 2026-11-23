@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import { FormEvent, useState, useEffect } from 'react'
 import Link from 'next/link'
 import {
   ArrowRight,
@@ -27,9 +27,11 @@ import {
   Cpu,
   Microscope,
   Target,
+  Lock,
 } from 'lucide-react'
 import { HeroBannerCard } from '@/components/HeroBannerCard'
 import { instituteConfig } from '@/lib/institute'
+import { dataService } from '@/services/dataService'
 
 function InstagramIcon({ className = 'size-4' }: { className?: string }) {
   return (
@@ -52,7 +54,7 @@ function InstagramIcon({ className = 'size-4' }: { className?: string }) {
 }
 
 // Centralized course details with ₹4,999 pricing and syllabus pathways
-export const courses = [
+const courses = [
   {
     id: 'physical',
     number: '01',
@@ -217,6 +219,19 @@ export default function Page() {
   const [formFeedback, setFormFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [playlistNotice, setPlaylistNotice] = useState<string | null>(null)
 
+  // Live content from shared mock data layer
+  const [liveContent, setLiveContent] = useState(dataService.getWebsiteContent(false))
+  const [liveCourses, setLiveCourses] = useState(dataService.getCourses(false))
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setLiveContent(dataService.getWebsiteContent(false))
+      setLiveCourses(dataService.getCourses(false))
+    }
+    const unsubscribe = dataService.subscribe(handleUpdate)
+    return () => unsubscribe()
+  }, [])
+
   function scrollTo(id: string) {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
   }
@@ -241,6 +256,16 @@ export default function Page() {
       setFormFeedback({ type: 'error', text: 'Please enter a valid 10-digit phone number.' })
       return
     }
+
+    // Submit enquiry into shared dataService inbox for Admin Dashboard
+    dataService.submitEnquiry({
+      name: studentName.trim(),
+      phone: phoneNumber.trim(),
+      classGrade: selectedCourse.includes('11') ? 'Class 11th' : 'Class 12th',
+      stream: 'Board Focus',
+      message: message.trim() || `Interested in enrolling for ${selectedCourse}`,
+      notes: 'Submitted via Public Website Enquire Form',
+    })
 
     setFormFeedback({
       type: 'success',
@@ -317,6 +342,16 @@ export default function Page() {
               <ArrowRight aria-hidden="true" className="size-3.5" />
             </button>
 
+            {/* Exactly ONE small Admin button on the public landing page */}
+            <Link
+              href="/admin"
+              className="inline-flex items-center gap-1 rounded-full border border-[#DED5C5] bg-[#FFFDF8] px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold text-[#12372A] shadow-2xs transition hover:bg-[#F7F2E8] hover:border-[#12372A]/30 active:scale-95"
+              title="Admin Portal"
+            >
+              <Lock className="size-3 text-[#E8A33D]" />
+              <span>Admin</span>
+            </Link>
+
             <button
               className="grid size-9 place-items-center rounded-full text-[#12372A] hover:bg-[#F7F2E8] md:hidden"
               onClick={() => setMenuOpen(!menuOpen)}
@@ -376,23 +411,32 @@ export default function Page() {
           {/* LEFT SIDE: Headings, Badge, CTAs, Features */}
           <div>
             {/* Admissions Open Announcement Badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#DED5C5] bg-[#F7F2E8] px-3.5 py-1.5 text-xs font-semibold text-[#12372A] shadow-xs">
-              <span className="size-2 rounded-full bg-[#12372A] animate-pulse" />
-              <span>{instituteConfig.admissions.toUpperCase()} | {instituteConfig.classes.toUpperCase()}</span>
-            </div>
+            {liveContent.showAnnouncement && (
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#DED5C5] bg-[#F7F2E8] px-3.5 py-1.5 text-xs font-semibold text-[#12372A] shadow-xs">
+                <span className="size-2 rounded-full bg-[#12372A] animate-pulse" />
+                <span>{(liveContent.announcementTag || instituteConfig.admissions).toUpperCase()} | {instituteConfig.classes.toUpperCase()}</span>
+              </div>
+            )}
 
             {/* Main Headline */}
             <h1 className="mt-5 text-3xl sm:text-4xl lg:text-[3.25rem] font-extrabold tracking-tight text-[#12372A] leading-[1.18]">
-              Master Chemistry.{' '}
-              <span className="text-[#12372A] underline decoration-[#E8A33D] decoration-4 underline-offset-8">
-                Build Your Future.
-              </span>
+              {liveContent.heroHeadline.includes('.') ? (
+                <>
+                  {liveContent.heroHeadline.split('.')[0]}.{' '}
+                  <span className="text-[#12372A] underline decoration-[#E8A33D] decoration-4 underline-offset-8">
+                    {liveContent.heroHeadline.split('.').slice(1).join('.').trim()}
+                  </span>
+                </>
+              ) : (
+                <span className="text-[#12372A] underline decoration-[#E8A33D] decoration-4 underline-offset-8">
+                  {liveContent.heroHeadline}
+                </span>
+              )}
             </h1>
 
             {/* Supporting Text */}
             <p className="mt-4 text-base sm:text-lg text-[#68675D] leading-relaxed max-w-xl">
-              Build strong Chemistry concepts with structured lessons, focused explanations,
-              and a learning approach designed for {instituteConfig.classes} students across {instituteConfig.streams} streams.
+              {liveContent.heroSubheadline}
             </p>
 
             {/* Action Buttons */}
@@ -460,7 +504,7 @@ export default function Page() {
 
           {/* 4 Image-Based Course Cards in Light, Attractive Theme */}
           <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {courses.map((course) => {
+            {(liveCourses && liveCourses.length > 0 ? liveCourses.filter((c) => c.status === 'live') : courses).map((course) => {
               return (
                 <article
                   key={course.id}
