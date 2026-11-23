@@ -94,6 +94,18 @@ class AuthService {
         this.memoryAdmins = [defaultAdminSeed]
       } else {
         this.memoryAdmins = JSON.parse(storedAdmins)
+        // Auto-migrate default owner avatar if it still has old unsplash photo
+        let migrated = false
+        this.memoryAdmins = this.memoryAdmins.map((adm) => {
+          if (adm.avatar?.includes('photo-1534528741775-53994a69daeb')) {
+            migrated = true
+            return { ...adm, avatar: '/image10-collar.png' }
+          }
+          return adm
+        })
+        if (migrated) {
+          localStorage.setItem(STORAGE_KEY_ADMINS, JSON.stringify(this.memoryAdmins))
+        }
       }
 
       // 2. Initialize passwords (hashed)
@@ -114,6 +126,14 @@ class AuthService {
         const match = this.memoryAdmins.find((u) => u.userId.toLowerCase() === parsed.userId.toLowerCase())
         if (match && !match.disabled) {
           this.currentSessionUser = match
+          if (parsed.avatar?.includes('photo-1534528741775-53994a69daeb')) {
+            if (localStorage.getItem(STORAGE_KEY_SESSION)) {
+              localStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify(match))
+            }
+            if (sessionStorage.getItem(STORAGE_KEY_SESSION)) {
+              sessionStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify(match))
+            }
+          }
           this.notifyListeners()
         }
       }

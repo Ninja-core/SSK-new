@@ -44,7 +44,7 @@ export function AdminIconRail({
     { id: 'videos', label: 'Video Lectures', icon: Video },
     { id: 'documents', label: 'PDFs, Notes & DPPs', icon: FileText },
     { id: 'tests', label: 'Test Series', icon: FileCheck2 },
-    { id: 'enquiries', label: 'Students & Enquiries', icon: Users, hasBadge: newEnquiriesCount > 0 },
+    { id: 'enquiries', label: 'Students & Enquiries', icon: Users },
     { id: 'website', label: 'Banners & Website Text', icon: Sliders },
     { id: 'accounts', label: 'Admin Accounts', icon: ShieldAlert },
     { id: 'profile', label: 'My Profile', icon: UserCheck },

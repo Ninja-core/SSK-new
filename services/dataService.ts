@@ -98,6 +98,18 @@ class DataService {
       const storedPublished = localStorage.getItem(STORAGE_KEY_PUBLISHED)
       if (storedPublished) {
         this.publishedState = JSON.parse(storedPublished)
+        if (this.publishedState.enquiries) {
+          let updated = false
+          this.publishedState.enquiries.forEach((e) => {
+            if (e.id === 'enq_101' && e.status === 'New') {
+              e.status = 'Contacted'
+              updated = true
+            }
+          })
+          if (updated) {
+            localStorage.setItem(STORAGE_KEY_PUBLISHED, JSON.stringify(this.publishedState))
+          }
+        }
       } else {
         localStorage.setItem(STORAGE_KEY_PUBLISHED, JSON.stringify(this.publishedState))
       }
@@ -105,6 +117,18 @@ class DataService {
       const storedDraft = localStorage.getItem(STORAGE_KEY_DRAFT)
       if (storedDraft) {
         this.draftState = JSON.parse(storedDraft)
+        if (this.draftState.enquiries) {
+          let updated = false
+          this.draftState.enquiries.forEach((e) => {
+            if (e.id === 'enq_101' && e.status === 'New') {
+              e.status = 'Contacted'
+              updated = true
+            }
+          })
+          if (updated) {
+            localStorage.setItem(STORAGE_KEY_DRAFT, JSON.stringify(this.draftState))
+          }
+        }
       } else {
         this.draftState = JSON.parse(JSON.stringify(this.publishedState))
         localStorage.setItem(STORAGE_KEY_DRAFT, JSON.stringify(this.draftState))

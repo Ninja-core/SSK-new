@@ -185,9 +185,6 @@ export function AdminTopMenu({
             }`}
           >
             <span>Enquiries</span>
-            {newEnquiriesCount > 0 && (
-              <span className="size-2 rounded-full bg-[#E8A33D] animate-pulse" />
-            )}
           </button>
 
           {/* Website */}
@@ -221,13 +218,10 @@ export function AdminTopMenu({
           <button
             onClick={() => onSelectTab('enquiries')}
             className="size-10 rounded-full bg-white border border-[#E6DFCC]/80 flex items-center justify-center text-[#13321F] hover:bg-[#F8F4EA] transition cursor-pointer relative shadow-2xs active:scale-95"
-            title={newEnquiriesCount > 0 ? `${newEnquiriesCount} new enquiries` : 'No new notifications'}
+            title="Notifications"
             aria-label="Notifications"
           >
             <Bell className="size-4 text-[#13321F]" />
-            {newEnquiriesCount > 0 && (
-              <span className="absolute top-2 right-2 size-2 rounded-full bg-[#E8A33D] ring-2 ring-white" />
-            )}
           </button>
 
           {/* Owner Round Avatar Dropdown */}

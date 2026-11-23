@@ -161,7 +161,7 @@ export const defaultAdminSeed: AdminUserSeed = {
   userId: 'sskadmin',
   name: 'Owner',
   role: 'Owner',
-  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+  avatar: '/image10-collar.png',
   createdAt: '2026-01-01T00:00:00.000Z',
   lastLogin: '2026-11-21T18:30:00.000Z',
   isDefaultPassword: true, // triggers the gentle warning banner until changed
@@ -588,7 +588,7 @@ export const defaultEnquiriesSeed: EnquirySeed[] = [
     stream: 'Non-Medical (JEE)',
     message: 'Interested in Physical Chemistry demo class for Sunday batch. Please confirm timings.',
     date: '2026-11-21T10:14:00.000Z',
-    status: 'New',
+    status: 'Contacted',
     notes: 'Called from Ramgarh main market. Prefers morning 9:00 AM batch.',
     followUpDate: '2026-11-22',
   },

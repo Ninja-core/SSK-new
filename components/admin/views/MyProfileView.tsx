@@ -25,7 +25,11 @@ export function MyProfileView({ currentUser, onProfileUpdated }: MyProfileViewPr
 
   // Profile details state
   const [name, setName] = useState(currentUser.name)
-  const [avatarUrl, setAvatarUrl] = useState(currentUser.avatar || '')
+  const [avatarUrl, setAvatarUrl] = useState(
+    currentUser.avatar?.includes('photo-1534528741775-53994a69daeb')
+      ? '/image10-collar.png'
+      : currentUser.avatar || '/image10-collar.png'
+  )
   const [savingProfile, setSavingProfile] = useState(false)
 
   // Password change state
@@ -108,7 +112,7 @@ export function MyProfileView({ currentUser, onProfileUpdated }: MyProfileViewPr
   }
 
   const avatarPresets = [
-    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    '/image10-collar.png',
     'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
