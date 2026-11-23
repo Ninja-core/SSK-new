@@ -1,3 +1,23 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+functions/node_modules/
+
+# Testing & Coverage
+coverage/
+
+# Next.js & Build outputs
+.next/
+out/
+build/
+dist/
+.turbo/
+
+# TypeScript build cache
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
 # v0 sandbox internal files
 __v0_runtime_loader.js
 __v0_devtools.tsx
@@ -7,10 +27,43 @@ __v0_jsx-dev-runtime.ts
 .v0-trash/
 .vercel/
 
-# Environment variables
-.env*.local
+# AI Agent / Tooling local caches & installed skills
+.agents/
+.claude/
+skills-lock.json
 
-# Common ignores
-node_modules
-.next/
+# Environment variables & secrets
+.env
+.env*.local
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+*.log
+
+# Firebase local caches
+.firebase/
+
+# Runtime / transactional data
+protected-materials/payment_records.json
+
+# OS files
 .DS_Store
+*.pem
+Thumbs.db
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+.eslintcache
