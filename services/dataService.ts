@@ -41,6 +41,7 @@ import {
   EnquirySeed,
   StudentSeed,
 } from '@/lib/seedData'
+import { storageService } from './storageService'
 
 export type WebsiteContent = WebsiteContentSeed
 export type BannerItem = BannerItemSeed
@@ -73,6 +74,9 @@ class DataService {
     this.publishedState = this.getInitialSeedState()
     this.draftState = this.getInitialSeedState()
     this.loadFromStorage()
+    if (this.isClient()) {
+      setTimeout(() => this.syncWithCloudStorage(), 100)
+    }
   }
 
   private isClient(): boolean {
@@ -389,9 +393,53 @@ class DataService {
     return fullLesson
   }
 
+  public async syncWithCloudStorage(): Promise<void> {
+    if (!this.isClient()) return
+    try {
+      const materials = await storageService.listMaterials()
+      if (materials && materials.length > 0) {
+        let changed = false
+        materials.forEach((m: any) => {
+          const exists = this.draftState.lessons.some((l) => l.id === m.id)
+          if (!exists) {
+            this.draftState.lessons.unshift({
+              id: m.id,
+              title: m.title || m.originalFileName,
+              courseId: m.subject ? m.subject.toLowerCase().replace(/[^a-z0-9]/g, '-') : 'general',
+              courseName: m.subject || 'Chemistry',
+              chapter: m.chapter || 'General',
+              type: (m.contentType as any) || 'PDF',
+              description: m.description || '',
+              fileUrl: `/api/admin/materials/${m.id}/preview`,
+              fileName: m.originalFileName || 'document.pdf',
+              fileSize: m.fileSizeFormatted || '1.0 MB',
+              enrolledOnly: m.enrolledOnly ?? true,
+              allowDownload: m.allowDownload ?? true,
+              status: m.published ? 'live' : 'draft',
+              uploadedAt: m.createdAt || new Date().toISOString(),
+              downloadsCount: 0,
+              viewsCount: 0,
+            })
+            changed = true
+          }
+        })
+        if (changed) {
+          this.persistDraft()
+        }
+      }
+    } catch (e) {
+      console.warn('[dataService] syncWithCloudStorage error:', e)
+    }
+  }
+
   public async deleteLesson(id: string): Promise<boolean> {
     this.draftState.lessons = this.draftState.lessons.filter((l) => l.id !== id)
     this.persistDraft()
+    try {
+      await storageService.deleteFile(id)
+    } catch (e) {
+      console.warn('[dataService] Notice deleting cloud storage file:', e)
+    }
     return true
   }
 

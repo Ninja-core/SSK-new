@@ -289,6 +289,18 @@ export function DocumentsView({ onOpenUpload }: DocumentsViewProps) {
                 </button>
 
                 <div className="flex items-center gap-1">
+                  {doc.fileUrl && (
+                    <a
+                      href={doc.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="size-8 rounded-full flex items-center justify-center text-[#1F5A3A] hover:bg-[#EAF3EC] transition cursor-pointer"
+                      title="Preview / Open in new tab"
+                    >
+                      <Eye className="size-3.5" />
+                    </a>
+                  )}
+
                   <button
                     onClick={() => handleToggleEnrolled(doc)}
                     className="size-8 rounded-full flex items-center justify-center text-[#6B7A70] hover:bg-[#F8F4EA] transition cursor-pointer"

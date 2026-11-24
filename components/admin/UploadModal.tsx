@@ -96,7 +96,7 @@ export function UploadModal({
 
   const handleFileSelected = (file: File) => {
     setValidationError(null)
-    const expected = isVideo ? 'video' : 'pdf'
+    const expected = isVideo ? 'video' : 'document'
     const check = storageService.validateFile(file, expected)
     if (!check.valid) {
       setValidationError(check.error || 'Invalid file format')
@@ -119,7 +119,7 @@ export function UploadModal({
     }
 
     if (!selectedFile) {
-      setValidationError(`Please select a ${isVideo ? 'video' : 'PDF'} file to upload.`)
+      setValidationError(`Please select a ${isVideo ? 'video' : 'study material'} file to upload.`)
       return
     }
 
@@ -128,17 +128,26 @@ export function UploadModal({
 
     try {
       // -----------------------------------------------------------------
-      // CONNECT FIREBASE STORAGE HERE:
-      // Uses storageService.uploadFile which delegates to Firebase Storage
+      // REAL FIREBASE STORAGE & FIRESTORE UPLOAD
+      // Uploads actual bytes to gs://ssk-coaching-website-33ef8.firebasestorage.app
+      // and records metadata in Cloud Firestore ('studyMaterials')
       // -----------------------------------------------------------------
-      const folder = isVideo ? 'videos' : 'documents'
       const finalCourseName = courseName.trim() || 'General Chemistry'
       const finalCourseId = finalCourseName.toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 30) || 'course'
-      const uploadPath = `${folder}/${finalCourseId}/${Date.now()}_${selectedFile.name}`
 
       const uploadResult = await storageService.uploadFile(
         selectedFile,
-        uploadPath,
+        {
+          title: title.trim(),
+          courseName: finalCourseName,
+          class: 'Class 11 & 12',
+          contentType,
+          chapter: chapter.trim() || 'General Topics',
+          description: description.trim(),
+          enrolledOnly,
+          allowDownload,
+          uploadedBy: 'sskadmin',
+        },
         (progress) => {
           setUploadProgress(progress)
         }
@@ -146,6 +155,7 @@ export function UploadModal({
 
       // Save lesson record to data layer
       const newLesson = await dataService.saveLesson({
+        id: uploadResult.id,
         title: title.trim(),
         courseId: finalCourseId,
         courseName: finalCourseName,
@@ -165,12 +175,14 @@ export function UploadModal({
 
       success(
         saveAsDraft ? 'Saved as draft' : 'Uploaded successfully',
-        `"${newLesson.title}" has been saved.`
+        `"${newLesson.title}" has been saved to Firebase Storage.`
       )
       onSuccess(newLesson)
       onClose()
-    } catch (err) {
-      error('Upload failed', 'An error occurred while uploading. Please try again.')
+    } catch (err: any) {
+      const msg = err?.message || 'An error occurred while uploading to Firebase Storage. Please try again.'
+      setValidationError(msg)
+      error('Upload failed', msg)
     } finally {
       setSaving(false)
       setUploadProgress(null)
@@ -308,13 +320,17 @@ export function UploadModal({
           {/* Row 3: Drag & Drop File Upload Zone */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-[#13321F] mb-1.5">
-              File Attachment ({isVideo ? 'MP4 / MOV / WebM up to 500MB' : 'PDF Document up to 50MB'})
+              File Attachment ({isVideo ? 'MP4 / MOV / WebM up to 500MB' : 'PDF, DOCX, PPTX, JPG, PNG up to 50MB'})
             </label>
 
             <input
               ref={fileInputRef}
               type="file"
-              accept={isVideo ? 'video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm' : 'application/pdf,.pdf'}
+              accept={
+                isVideo
+                  ? 'video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm'
+                  : '.pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.jpeg,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,image/png,image/jpeg'
+              }
               onChange={handleFileInputChange}
               className="hidden"
             />
@@ -354,11 +370,13 @@ export function UploadModal({
                     <Upload className="size-5.5 text-[#13321F]" />
                   </div>
                   <p className="text-xs sm:text-sm font-bold text-[#13321F]">
-                    Drag and drop your {isVideo ? 'video' : 'PDF'} here, or{' '}
+                    Drag and drop your {isVideo ? 'video' : 'document'} here, or{' '}
                     <span className="text-[#C48A2C] underline font-black">browse</span>
                   </p>
                   <p className="text-[11px] text-[#6B7A70] mt-0.5">
-                    {isVideo ? 'Supports MP4, MOV, WebM (Max 500 MB)' : 'PDF format only (Max 50 MB)'}
+                    {isVideo
+                      ? 'Supports MP4, MOV, WebM (Max 500 MB)'
+                      : 'Supports PDF, DOC, DOCX, PPT, PPTX, JPG, PNG (Max 50 MB)'}
                   </p>
                 </div>
               )}

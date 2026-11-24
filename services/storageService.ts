@@ -1,38 +1,14 @@
 // =======================================================================
 // SSK PROFESSIONAL COACHING CLASSES - STORAGE SERVICE
 // =======================================================================
-// All media & document file uploading logic is encapsulated here.
-// Currently simulates client-side progress callbacks, file validation,
-// and produces mock object/data URLs.
-//
-// =======================================================================
-// [FIREBASE STORAGE MIGRATION GUIDE]
-// When ready to connect Firebase Storage (Google Cloud Storage):
-// 1. Initialize:
-//    import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage'
-//    const storage = getStorage()
-//
-// 2. In uploadFile():
-//    const storageRef = ref(storage, path)
-//    const uploadTask = uploadBytesResumable(storageRef, file)
-//    uploadTask.on('state_changed',
-//      (snapshot) => {
-//        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-//        onProgress?.(Math.round(progress))
-//      },
-//      (error) => reject(error),
-//      async () => {
-//        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref)
-//        resolve({ url: downloadURL, path, name: file.name, size: file.size, mimeType: file.type })
-//      }
-//    )
-//
-// 3. In deleteFile():
-//    const fileRef = ref(storage, path)
-//    await deleteObject(fileRef)
+// Encapsulates all real Firebase Storage upload, validation, and deletion.
+// Uploads actual file bytes directly to the Firebase Storage bucket:
+// gs://ssk-coaching-website-33ef8.firebasestorage.app
+// and records corresponding metadata in Cloud Firestore ('studyMaterials').
 // =======================================================================
 
 export interface UploadResult {
+  id?: string
   url: string
   path: string
   name: string
@@ -42,46 +18,74 @@ export interface UploadResult {
   uploadedAt: string
 }
 
+export interface UploadMetadataParams {
+  title: string
+  courseName?: string
+  class?: string
+  contentType?: string
+  chapter?: string
+  description?: string
+  enrolledOnly?: boolean
+  allowDownload?: boolean
+  uploadedBy?: string
+}
+
 export interface FileValidationResult {
   valid: boolean
   error?: string
 }
 
 class StorageService {
-  private inMemoryFiles: Map<string, { url: string; size: number }> = new Map()
-
   // ---------------------------------------------------------------------
-  // VALIDATE FILE (Type & Size constraints)
+  // VALIDATE FILE (Type & Size constraints for PDF, DOC, PPT, Images, Videos)
   // ---------------------------------------------------------------------
-  public validateFile(file: File, expectedType: 'video' | 'pdf' | 'image' | 'any'): FileValidationResult {
+  public validateFile(file: File, expectedType: 'video' | 'pdf' | 'document' | 'image' | 'any'): FileValidationResult {
+    const ext = (file.name.split('.').pop() || '').toLowerCase()
     const maxVideoSize = 500 * 1024 * 1024 // 500 MB
-    const maxPdfSize = 50 * 1024 * 1024 // 50 MB
-    const maxImageSize = 10 * 1024 * 1024 // 10 MB
+    const maxDocSize = 50 * 1024 * 1024 // 50 MB
+    const maxImageSize = 20 * 1024 * 1024 // 20 MB
 
     if (expectedType === 'video') {
-      const validVideoMimes = ['video/mp4', 'video/quicktime', 'video/webm', 'video/x-matroska']
-      const hasValidExt = /\.(mp4|mov|webm|mkv)$/i.test(file.name)
-      if (!validVideoMimes.includes(file.type) && !hasValidExt) {
+      const validVideoExts = ['mp4', 'mov', 'webm', 'mkv']
+      if (!validVideoExts.includes(ext) && !file.type.startsWith('video/')) {
         return { valid: false, error: 'Invalid video format. Supported: MP4, MOV, WebM.' }
       }
       if (file.size > maxVideoSize) {
         return { valid: false, error: 'Video file size exceeds the 500 MB limit.' }
       }
     } else if (expectedType === 'pdf') {
-      const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name)
+      const isPdf = ext === 'pdf' || file.type === 'application/pdf'
       if (!isPdf) {
-        return { valid: false, error: 'Invalid file format. Please upload a standard PDF (.pdf) document.' }
+        return { valid: false, error: 'Invalid document format. Please upload a standard PDF (.pdf) file.' }
       }
-      if (file.size > maxPdfSize) {
+      if (file.size > maxDocSize) {
         return { valid: false, error: 'PDF file size exceeds the 50 MB limit.' }
       }
+    } else if (expectedType === 'document') {
+      const validDocExts = ['pdf', 'doc', 'docx', 'ppt', 'pptx']
+      if (!validDocExts.includes(ext)) {
+        return { valid: false, error: 'Invalid file format. Supported: PDF, DOC, DOCX, PPT, PPTX.' }
+      }
+      if (file.size > maxDocSize) {
+        return { valid: false, error: 'Document file size exceeds the 50 MB limit.' }
+      }
     } else if (expectedType === 'image') {
-      const isImage = file.type.startsWith('image/') || /\.(png|jpe?g|webp|svg)$/i.test(file.name)
-      if (!isImage) {
-        return { valid: false, error: 'Invalid image format. Supported: PNG, JPG, WebP, SVG.' }
+      const validImgExts = ['png', 'jpg', 'jpeg', 'webp']
+      if (!validImgExts.includes(ext) && !file.type.startsWith('image/')) {
+        return { valid: false, error: 'Invalid image format. Supported: PNG, JPG, JPEG, WebP.' }
       }
       if (file.size > maxImageSize) {
-        return { valid: false, error: 'Image file size exceeds the 10 MB limit.' }
+        return { valid: false, error: 'Image file size exceeds the 20 MB limit.' }
+      }
+    } else if (expectedType === 'any') {
+      const allValid = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'jpg', 'jpeg', 'png', 'mp4', 'mov', 'webm']
+      if (!allValid.includes(ext)) {
+        return { valid: false, error: `Unsupported file type .${ext}. Allowed: PDF, DOC/DOCX, PPT/PPTX, JPG, PNG, MP4.` }
+      }
+      const isVideoFile = ['mp4', 'mov', 'webm'].includes(ext)
+      const limit = isVideoFile ? maxVideoSize : maxDocSize
+      if (file.size > limit) {
+        return { valid: false, error: `File size exceeds the allowed limit (${this.formatBytes(limit)}).` }
       }
     }
 
@@ -89,79 +93,133 @@ class StorageService {
   }
 
   // ---------------------------------------------------------------------
-  // UPLOAD FILE WITH PROGRESS CALLBACK
-  // ---------------------------------------------------------------------
-  // CONNECT FIREBASE STORAGE HERE:
-  // Use uploadBytesResumable(ref(storage, path), file)
+  // UPLOAD FILE TO FIREBASE STORAGE (via authenticated server endpoint)
   // ---------------------------------------------------------------------
   public async uploadFile(
     file: File,
-    path: string,
+    uploadPathOrParams: string | UploadMetadataParams,
     onProgress?: (percent: number) => void
   ): Promise<UploadResult> {
-    return new Promise((resolve) => {
-      // Simulate stepped network upload progression
-      let currentProgress = 0
-      onProgress?.(0)
+    return new Promise((resolve, reject) => {
+      const formData = new FormData()
+      formData.append('file', file)
 
-      const interval = setInterval(() => {
-        const step = Math.floor(Math.random() * 20) + 15
-        currentProgress = Math.min(100, currentProgress + step)
-        onProgress?.(currentProgress)
+      // Handle either legacy path string or rich metadata params
+      if (typeof uploadPathOrParams === 'object') {
+        formData.append('title', uploadPathOrParams.title || file.name)
+        if (uploadPathOrParams.courseName) formData.append('courseName', uploadPathOrParams.courseName)
+        if (uploadPathOrParams.class) formData.append('class', uploadPathOrParams.class)
+        if (uploadPathOrParams.contentType) formData.append('contentType', uploadPathOrParams.contentType)
+        if (uploadPathOrParams.chapter) formData.append('chapter', uploadPathOrParams.chapter)
+        if (uploadPathOrParams.description) formData.append('description', uploadPathOrParams.description)
+        if (uploadPathOrParams.enrolledOnly !== undefined) formData.append('enrolledOnly', String(uploadPathOrParams.enrolledOnly))
+        if (uploadPathOrParams.allowDownload !== undefined) formData.append('allowDownload', String(uploadPathOrParams.allowDownload))
+        if (uploadPathOrParams.uploadedBy) formData.append('uploadedBy', uploadPathOrParams.uploadedBy)
+      } else {
+        // Path string fallback
+        formData.append('title', file.name)
+        formData.append('courseName', 'Chemistry')
+        formData.append('class', 'Class 11 & 12')
+      }
 
-        if (currentProgress >= 100) {
-          clearInterval(interval)
+      const xhr = new XMLHttpRequest()
+      xhr.open('POST', '/api/admin/materials')
+      xhr.withCredentials = true // Ensures ssk_admin_logged_in cookie is sent
 
-          // In browser, create a usable Object URL for live preview
-          let objectUrl = ''
-          if (typeof window !== 'undefined' && window.URL && window.URL.createObjectURL) {
-            try {
-              objectUrl = window.URL.createObjectURL(file)
-            } catch {
-              objectUrl = `/uploads/${encodeURIComponent(file.name)}`
-            }
-          } else {
-            objectUrl = `/uploads/${encodeURIComponent(file.name)}`
-          }
-
-          const formatted = this.formatBytes(file.size)
-          this.inMemoryFiles.set(path, { url: objectUrl, size: file.size })
-
-          resolve({
-            url: objectUrl,
-            path,
-            name: file.name,
-            size: file.size,
-            sizeFormatted: formatted,
-            mimeType: file.type || 'application/octet-stream',
-            uploadedAt: new Date().toISOString(),
-          })
+      // Track true upload progress
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percent = Math.round((event.loaded / event.total) * 100)
+          onProgress?.(percent)
         }
-      }, 120)
+      }
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const data = JSON.parse(xhr.responseText)
+            if (data.success && data.material) {
+              const m = data.material
+              resolve({
+                id: m.id,
+                url: `/api/admin/materials/${m.id}/preview`,
+                path: m.storagePath,
+                name: m.originalFileName || file.name,
+                size: m.fileSize || file.size,
+                sizeFormatted: m.fileSizeFormatted || this.formatBytes(file.size),
+                mimeType: m.mimeType || file.type || 'application/octet-stream',
+                uploadedAt: m.createdAt || new Date().toISOString(),
+              })
+              return
+            }
+            reject(new Error(data.error || 'Upload failed with invalid response.'))
+          } catch {
+            reject(new Error('Invalid response received from storage upload endpoint.'))
+          }
+        } else {
+          try {
+            const errorData = JSON.parse(xhr.responseText)
+            reject(new Error(errorData.error || `Upload failed with HTTP ${xhr.status}`))
+          } catch {
+            reject(new Error(`Upload failed with HTTP status ${xhr.status}`))
+          }
+        }
+      }
+
+      xhr.onerror = () => {
+        reject(new Error('Network error occurred while uploading file to Firebase Storage.'))
+      }
+
+      xhr.ontimeout = () => {
+        reject(new Error('Upload request timed out.'))
+      }
+
+      xhr.send(formData)
     })
   }
 
   // ---------------------------------------------------------------------
-  // GET FILE URL
+  // DELETE FILE (from both Firebase Storage & Firestore)
   // ---------------------------------------------------------------------
-  // CONNECT FIREBASE STORAGE HERE:
-  // getDownloadURL(ref(storage, path))
-  // ---------------------------------------------------------------------
-  public async getFileUrl(path: string): Promise<string> {
-    const existing = this.inMemoryFiles.get(path)
-    if (existing) return existing.url
-    return `/uploads/${path}`
+  public async deleteFile(idOrPath: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const isPath = idOrPath.includes('/')
+      const url = isPath
+        ? `/api/admin/materials?storagePath=${encodeURIComponent(idOrPath)}`
+        : `/api/admin/materials?id=${encodeURIComponent(idOrPath)}`
+
+      const res = await fetch(url, {
+        method: 'DELETE',
+        credentials: 'include',
+      })
+
+      const data = await res.json()
+      if (res.ok && data.success) {
+        return { success: true }
+      }
+      return { success: false, error: data.error || 'Failed to delete file' }
+    } catch (err: any) {
+      console.error('deleteFile error:', err)
+      return { success: false, error: err.message || 'Network error deleting file' }
+    }
   }
 
   // ---------------------------------------------------------------------
-  // DELETE FILE
+  // GET STORED MATERIALS LIST FROM FIRESTORE
   // ---------------------------------------------------------------------
-  // CONNECT FIREBASE STORAGE HERE:
-  // deleteObject(ref(storage, path))
-  // ---------------------------------------------------------------------
-  public async deleteFile(path: string): Promise<{ success: boolean }> {
-    this.inMemoryFiles.delete(path)
-    return { success: true }
+  public async listMaterials(): Promise<any[]> {
+    try {
+      const res = await fetch('/api/admin/materials', {
+        method: 'GET',
+        credentials: 'include',
+      })
+      if (!res.ok) return []
+      const data = await res.json()
+      return data.materials || []
+    } catch (e) {
+      console.warn('Failed to fetch materials list:', e)
+      return []
+    }
   }
 
   // Utility byte formatter

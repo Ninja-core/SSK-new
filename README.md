@@ -3,9 +3,6 @@
 Official website and administrative console for **SSK Professional Coaching Classes** (Class 11th & 12th Chemistry, Ramgarh). Built with Next.js, React 19, Tailwind CSS, and TypeScript.
 
 
-
-
-
 ---
 
 ## Quick Setup
@@ -47,3 +44,4 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - **Route**: `/admin` ([http://localhost:3000/admin](http://localhost:3000/admin))
 - **Default User ID**: `sskadmin`
 - **Default Password**: `SSK@12345` 
+
