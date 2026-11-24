@@ -522,26 +522,6 @@ export default function Page() {
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-
-                    {/* Top Badges */}
-                    <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between gap-1.5">
-                      <span
-                        className="rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider shadow-2xs"
-                        style={{
-                          backgroundColor: course.pillBg,
-                          color: course.pillText,
-                          border: `1px solid ${course.borderColor}`,
-                        }}
-                      >
-                        {course.eyebrow}
-                      </span>
-                      <span
-                        className="rounded-full px-2 py-0.5 text-[10px] font-extrabold text-white shadow-xs"
-                        style={{ backgroundColor: course.accentColor }}
-                      >
-                        {course.formattedPrice}
-                      </span>
-                    </div>
                   </div>
 
                   {/* Card Content */}

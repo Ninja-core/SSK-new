@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { storageService } from '@/services/storageService'
 import { dataService, LessonItem } from '@/services/dataService'
 import { useToast } from './ToastContext'
@@ -9,12 +9,12 @@ import {
   Upload,
   FileText,
   Video,
-  FileCheck2,
   CheckCircle2,
   AlertCircle,
   Calendar,
   Lock,
   Download,
+  ChevronDown,
 } from 'lucide-react'
 
 interface UploadModalProps {
@@ -34,10 +34,10 @@ export function UploadModal({
 }: UploadModalProps) {
   const { success, error } = useToast()
 
-  const [courseId, setCourseId] = useState(initialCourseId)
+  const [courseName, setCourseName] = useState('')
+  const [contentType, setContentType] = useState<'Video' | 'PDF' | 'Notes' | 'DPP' | 'PYQ'>(initialType)
   const [title, setTitle] = useState('')
   const [chapter, setChapter] = useState('')
-  const [contentType, setContentType] = useState<'Video' | 'PDF' | 'Notes' | 'DPP' | 'PYQ'>(initialType)
   const [description, setDescription] = useState('')
   const [enrolledOnly, setEnrolledOnly] = useState(true)
   const [allowDownload, setAllowDownload] = useState(true)
@@ -52,9 +52,21 @@ export function UploadModal({
 
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
+  useEffect(() => {
+    if (isOpen) {
+      setCourseName('')
+      setContentType(initialType)
+      setTitle('')
+      setChapter('')
+      setDescription('')
+      setSelectedFile(null)
+      setValidationError(null)
+      setUploadProgress(null)
+    }
+  }, [isOpen, initialType])
+
   if (!isOpen) return null
 
-  const courses = dataService.getCourses(true)
   const isVideo = contentType === 'Video'
 
   const handleDrag = (e: React.DragEvent) => {
@@ -120,7 +132,9 @@ export function UploadModal({
       // Uses storageService.uploadFile which delegates to Firebase Storage
       // -----------------------------------------------------------------
       const folder = isVideo ? 'videos' : 'documents'
-      const uploadPath = `${folder}/${courseId}/${Date.now()}_${selectedFile.name}`
+      const finalCourseName = courseName.trim() || 'General Chemistry'
+      const finalCourseId = finalCourseName.toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 30) || 'course'
+      const uploadPath = `${folder}/${finalCourseId}/${Date.now()}_${selectedFile.name}`
 
       const uploadResult = await storageService.uploadFile(
         selectedFile,
@@ -130,13 +144,11 @@ export function UploadModal({
         }
       )
 
-      const matchedCourse = courses.find((c) => c.id === courseId)
-
       // Save lesson record to data layer
       const newLesson = await dataService.saveLesson({
         title: title.trim(),
-        courseId,
-        courseName: matchedCourse ? matchedCourse.name : 'Physical Chemistry',
+        courseId: finalCourseId,
+        courseName: finalCourseName,
         chapter: chapter.trim() || 'General Topics',
         type: contentType,
         description: description.trim(),
@@ -166,19 +178,33 @@ export function UploadModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-2xl admin-glass-container bg-white/95 border border-white/80 rounded-[32px] shadow-2xl p-6 sm:p-8 my-8 animate-in fade-in zoom-in-95 duration-200">
-        {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-[#E6DFCC]/60 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="size-10 rounded-2xl bg-[#13321F] text-[#FAF5EC] flex items-center justify-center shadow-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-xs overflow-hidden">
+      {/* Backdrop overlay */}
+      <div
+        className="fixed inset-0"
+        onClick={saving ? undefined : onClose}
+        aria-hidden="true"
+      />
+
+      {/* Modal Dialog Box: Exactly min(90vw, 600px) and max-height 90vh */}
+      <div
+        className="relative w-full max-h-[90vh] bg-[#FAF7F0] rounded-[28px] border border-[#E6DFCC] shadow-[0_24px_60px_rgba(19,50,31,0.25)] flex flex-col overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-200"
+        style={{ width: 'min(90vw, 600px)' }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+      >
+        {/* Fixed Modal Header */}
+        <div className="px-5 sm:px-6 py-4 border-b border-[#E6DFCC]/70 flex items-center justify-between shrink-0 bg-white/95">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="size-10 rounded-2xl bg-[#13321F] text-[#FAF5EC] flex items-center justify-center shadow-xs shrink-0">
               {isVideo ? <Video className="size-5 text-[#E8A33D]" /> : <FileText className="size-5 text-[#E8A33D]" />}
             </div>
-            <div>
-              <h3 className="text-lg font-black text-[#13321F] tracking-tight">
+            <div className="min-w-0">
+              <h3 id="modal-title" className="text-base sm:text-lg font-black text-[#13321F] tracking-tight truncate">
                 Upload New Study Material
               </h3>
-              <p className="text-xs text-[#6B7A70] mt-0.5">
+              <p className="text-xs text-[#6B7A70] truncate">
                 Add video lectures, chapter notes, DPPs or question papers
               </p>
             </div>
@@ -187,68 +213,69 @@ export function UploadModal({
           <button
             onClick={onClose}
             disabled={saving}
-            className="size-8 rounded-full flex items-center justify-center text-[#6B7A70] hover:text-[#13321F] hover:bg-[#F8F4EA] transition cursor-pointer"
+            className="size-8 rounded-full flex items-center justify-center text-[#6B7A70] hover:text-[#13321F] hover:bg-black/5 transition cursor-pointer shrink-0 ml-2"
             aria-label="Close modal"
           >
             <X className="size-5" />
           </button>
         </div>
 
-        {/* Validation Error Banner */}
-        {validationError && (
-          <div className="mt-4 flex items-center gap-2 p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold">
-            <AlertCircle className="size-4 shrink-0 text-rose-600" />
-            <span>{validationError}</span>
-          </div>
-        )}
+        {/* Scrollable Form Body */}
+        <div className="px-5 sm:px-6 py-5 overflow-y-auto flex-1 space-y-4">
+          {/* Validation Error Banner */}
+          {validationError && (
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold">
+              <AlertCircle className="size-4 shrink-0 text-rose-600" />
+              <span>{validationError}</span>
+            </div>
+          )}
 
-        {/* Form Body */}
-        <div className="mt-5 space-y-4">
-          {/* Row 1: Course & Content Type */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
+          {/* Row 1: Target Course & Content Type (Clean Two-Column Grid on Desktop, Single Column on Mobile) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+            {/* Target Course Field: Direct text input for custom course name */}
+            <div className="flex flex-col">
               <label className="block text-xs font-bold uppercase tracking-wider text-[#13321F] mb-1.5">
                 Target Course
               </label>
-              <select
-                value={courseId}
-                onChange={(e) => setCourseId(e.target.value)}
+              <input
+                type="text"
+                value={courseName}
+                onChange={(e) => setCourseName(e.target.value)}
+                placeholder="Write custom course name..."
                 disabled={saving}
-                className="admin-input w-full h-12 px-4 rounded-2xl border border-[#E6DFCC] bg-white text-xs sm:text-sm font-semibold text-[#13321F]"
-              >
-                {courses.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+                className="w-full h-11 px-3.5 rounded-xl border border-[#E6DFCC] bg-white text-xs sm:text-sm font-semibold text-[#13321F] placeholder:text-[#6B7A70]/60 focus:outline-none focus:border-[#E8A33D] focus:ring-2 focus:ring-[#E8A33D]/20 transition shadow-2xs"
+              />
             </div>
 
-            <div>
+            {/* Content Type Field */}
+            <div className="flex flex-col">
               <label className="block text-xs font-bold uppercase tracking-wider text-[#13321F] mb-1.5">
                 Content Type
               </label>
-              <select
-                value={contentType}
-                onChange={(e) => {
-                  setContentType(e.target.value as any)
-                  setSelectedFile(null)
-                  setValidationError(null)
-                }}
-                disabled={saving}
-                className="admin-input w-full h-12 px-4 rounded-2xl border border-[#E6DFCC] bg-white text-xs sm:text-sm font-semibold text-[#13321F]"
-              >
-                <option value="PDF">PDF Notes</option>
-                <option value="Video">Video Lecture (MP4, MOV, WebM)</option>
-                <option value="Notes">Classroom Summary Notes</option>
-                <option value="DPP">Daily Practice Problem (DPP)</option>
-                <option value="PYQ">Board & Entrance PYQ Solutions</option>
-              </select>
+              <div className="relative w-full">
+                <select
+                  value={contentType}
+                  onChange={(e) => {
+                    setContentType(e.target.value as any)
+                    setSelectedFile(null)
+                    setValidationError(null)
+                  }}
+                  disabled={saving}
+                  className="w-full h-11 px-3.5 pr-9 rounded-xl border border-[#E6DFCC] bg-white text-xs sm:text-sm font-semibold text-[#13321F] focus:outline-none focus:border-[#E8A33D] focus:ring-2 focus:ring-[#E8A33D]/20 transition shadow-2xs appearance-none cursor-pointer"
+                >
+                  <option value="PDF">PDF Notes</option>
+                  <option value="Video">Video Lecture (MP4, MOV, WebM)</option>
+                  <option value="Notes">Classroom Summary Notes</option>
+                  <option value="DPP">Daily Practice Problem (DPP)</option>
+                  <option value="PYQ">Board & Entrance PYQ Solutions</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-[#6B7A70] pointer-events-none" />
+              </div>
             </div>
           </div>
 
-          {/* Row 2: Lesson Title & Chapter */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Row 2: Lesson Title & Chapter Topic (Clean Two-Column Grid on Desktop) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-[#13321F] mb-1.5">
                 Lesson Title *
@@ -259,7 +286,7 @@ export function UploadModal({
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Bohr Radius & Orbital Energy Derivations"
                 disabled={saving}
-                className="admin-input w-full h-12 px-4 rounded-2xl border border-[#E6DFCC] bg-white text-xs sm:text-sm font-medium text-[#13321F] placeholder:text-[#6B7A70]/60"
+                className="w-full h-11 px-3.5 rounded-xl border border-[#E6DFCC] bg-white text-xs sm:text-sm font-medium text-[#13321F] placeholder:text-[#6B7A70]/60 focus:outline-none focus:border-[#E8A33D] focus:ring-2 focus:ring-[#E8A33D]/20 transition shadow-2xs"
               />
             </div>
 
@@ -273,12 +300,12 @@ export function UploadModal({
                 onChange={(e) => setChapter(e.target.value)}
                 placeholder="e.g. Chapter 2 – Structure of Atom"
                 disabled={saving}
-                className="admin-input w-full h-12 px-4 rounded-2xl border border-[#E6DFCC] bg-white text-xs sm:text-sm font-medium text-[#13321F] placeholder:text-[#6B7A70]/60"
+                className="w-full h-11 px-3.5 rounded-xl border border-[#E6DFCC] bg-white text-xs sm:text-sm font-medium text-[#13321F] placeholder:text-[#6B7A70]/60 focus:outline-none focus:border-[#E8A33D] focus:ring-2 focus:ring-[#E8A33D]/20 transition shadow-2xs"
               />
             </div>
           </div>
 
-          {/* Drag & Drop Upload Zone */}
+          {/* Row 3: Drag & Drop File Upload Zone */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-[#13321F] mb-1.5">
               File Attachment ({isVideo ? 'MP4 / MOV / WebM up to 500MB' : 'PDF Document up to 50MB'})
@@ -298,37 +325,39 @@ export function UploadModal({
               onDragOver={handleDrag}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`border-2 border-dashed rounded-[24px] p-6 text-center cursor-pointer transition-all duration-200 ${
+              className={`border-2 border-dashed rounded-2xl p-5 text-center cursor-pointer transition-all duration-200 ${
                 dragActive
                   ? 'border-[#E8A33D] bg-[#E8A33D]/10 scale-[1.01]'
                   : selectedFile
                   ? 'border-[#1F5A3A] bg-[#1F5A3A]/5'
-                  : 'border-[#E6DFCC] bg-[#F8F4EA]/40 hover:bg-[#F8F4EA] hover:border-[#13321F]/30'
+                  : 'border-[#E6DFCC] bg-white hover:bg-[#F8F4EA]/50 hover:border-[#13321F]/30'
               }`}
             >
               {selectedFile ? (
                 <div className="flex flex-col items-center">
-                  <div className="size-12 rounded-full bg-[#1F5A3A]/15 text-[#1F5A3A] flex items-center justify-center mb-2">
-                    <CheckCircle2 className="size-6 text-[#1F5A3A]" />
+                  <div className="size-11 rounded-full bg-[#1F5A3A]/15 text-[#1F5A3A] flex items-center justify-center mb-1.5">
+                    <CheckCircle2 className="size-5.5 text-[#1F5A3A]" />
                   </div>
-                  <p className="text-sm font-black text-[#13321F]">{selectedFile.name}</p>
-                  <p className="text-xs text-[#6B7A70] mt-0.5">
+                  <p className="text-xs sm:text-sm font-black text-[#13321F] max-w-full truncate px-2">
+                    {selectedFile.name}
+                  </p>
+                  <p className="text-[11px] text-[#6B7A70] mt-0.5">
                     {storageService.formatBytes(selectedFile.size)} &bull; Ready to upload
                   </p>
-                  <span className="mt-2 text-[11px] font-bold text-[#8A5D14] underline hover:text-[#13321F]">
+                  <span className="mt-1.5 text-[11px] font-bold text-[#8A5D14] underline hover:text-[#13321F]">
                     Click to choose a different file
                   </span>
                 </div>
               ) : (
                 <div className="flex flex-col items-center">
-                  <div className="size-12 rounded-full bg-[#13321F]/10 text-[#13321F] flex items-center justify-center mb-2">
-                    <Upload className="size-6 text-[#13321F]" />
+                  <div className="size-11 rounded-full bg-[#13321F]/10 text-[#13321F] flex items-center justify-center mb-1.5">
+                    <Upload className="size-5.5 text-[#13321F]" />
                   </div>
-                  <p className="text-sm font-black text-[#13321F]">
+                  <p className="text-xs sm:text-sm font-bold text-[#13321F]">
                     Drag and drop your {isVideo ? 'video' : 'PDF'} here, or{' '}
-                    <span className="text-[#C48A2C] underline">browse</span>
+                    <span className="text-[#C48A2C] underline font-black">browse</span>
                   </p>
-                  <p className="text-xs text-[#6B7A70] mt-1">
+                  <p className="text-[11px] text-[#6B7A70] mt-0.5">
                     {isVideo ? 'Supports MP4, MOV, WebM (Max 500 MB)' : 'PDF format only (Max 50 MB)'}
                   </p>
                 </div>
@@ -337,12 +366,12 @@ export function UploadModal({
 
             {/* Upload Progress Bar */}
             {uploadProgress !== null && (
-              <div className="mt-3 p-3.5 rounded-2xl bg-[#F8F4EA] border border-[#DED5C5]">
+              <div className="mt-2.5 p-3 rounded-xl bg-white border border-[#DED5C5]">
                 <div className="flex items-center justify-between text-xs font-bold text-[#13321F] mb-1">
                   <span>Uploading to Storage...</span>
                   <span>{uploadProgress}%</span>
                 </div>
-                <div className="w-full h-2 rounded-full bg-[#DED5C5] overflow-hidden">
+                <div className="w-full h-2 rounded-full bg-[#E6DFCC] overflow-hidden">
                   <div
                     className="h-full bg-[#13321F] rounded-full transition-all duration-150"
                     style={{ width: `${uploadProgress}%` }}
@@ -352,7 +381,7 @@ export function UploadModal({
             )}
           </div>
 
-          {/* Description */}
+          {/* Row 4: Description (Optional) */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-[#13321F] mb-1.5">
               Description or Key Topics (Optional)
@@ -363,14 +392,14 @@ export function UploadModal({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Brief summary of derivations, formulas, or key concepts covered..."
               disabled={saving}
-              className="w-full p-3.5 rounded-2xl border border-[#E6DFCC] bg-white text-xs sm:text-sm font-medium text-[#13321F] placeholder:text-[#6B7A70]/60 focus:outline-none focus:border-[#E8A33D] focus:ring-2 focus:ring-[#E8A33D]/20 resize-none leading-relaxed"
+              className="w-full p-3 rounded-xl border border-[#E6DFCC] bg-white text-xs sm:text-sm font-medium text-[#13321F] placeholder:text-[#6B7A70]/60 focus:outline-none focus:border-[#E8A33D] focus:ring-2 focus:ring-[#E8A33D]/20 resize-none leading-relaxed shadow-2xs"
             />
           </div>
 
-          {/* Settings & Permissions */}
-          <div className="pt-3 border-t border-[#E6DFCC]/60 space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <label className="flex items-center gap-2.5 p-3 rounded-2xl bg-[#F8F4EA]/60 border border-[#E6DFCC]/80 cursor-pointer select-none hover:bg-[#F8F4EA] transition">
+          {/* Row 5: Permissions & Scheduling */}
+          <div className="pt-2 border-t border-[#E6DFCC]/60 space-y-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <label className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white border border-[#E6DFCC] cursor-pointer select-none hover:bg-[#F8F4EA]/60 transition">
                 <input
                   type="checkbox"
                   checked={enrolledOnly}
@@ -378,15 +407,15 @@ export function UploadModal({
                   disabled={saving}
                   className="size-4 rounded border-[#DED5C5] text-[#13321F] focus:ring-[#13321F] accent-[#13321F]"
                 />
-                <div className="flex items-center gap-1.5">
-                  <Lock className="size-3.5 text-[#8A5D14]" />
-                  <span className="text-xs font-bold text-[#13321F]">
-                    Visible to enrolled students only
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <Lock className="size-3.5 text-[#8A5D14] shrink-0" />
+                  <span className="text-xs font-bold text-[#13321F] truncate">
+                    Enrolled students only
                   </span>
                 </div>
               </label>
 
-              <label className="flex items-center gap-2.5 p-3 rounded-2xl bg-[#F8F4EA]/60 border border-[#E6DFCC]/80 cursor-pointer select-none hover:bg-[#F8F4EA] transition">
+              <label className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white border border-[#E6DFCC] cursor-pointer select-none hover:bg-[#F8F4EA]/60 transition">
                 <input
                   type="checkbox"
                   checked={allowDownload}
@@ -394,37 +423,37 @@ export function UploadModal({
                   disabled={saving}
                   className="size-4 rounded border-[#DED5C5] text-[#13321F] focus:ring-[#13321F] accent-[#13321F]"
                 />
-                <div className="flex items-center gap-1.5">
-                  <Download className="size-3.5 text-[#1F5A3A]" />
-                  <span className="text-xs font-bold text-[#13321F]">
-                    Allow student offline download
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <Download className="size-3.5 text-[#1F5A3A] shrink-0" />
+                  <span className="text-xs font-bold text-[#13321F] truncate">
+                    Allow offline download
                   </span>
                 </div>
               </label>
             </div>
-        
+
             {/* Schedule Date */}
-            <div className="flex items-center gap-2 pt-1">
-              <Calendar className="size-4 text-[#6B7A70]" />
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <Calendar className="size-3.5 text-[#6B7A70]" />
               <label className="text-xs font-bold text-[#13321F]">Schedule publish date (Optional):</label>
               <input
                 type="date"
                 value={scheduleDate}
                 onChange={(e) => setScheduleDate(e.target.value)}
                 disabled={saving}
-                className="px-3 py-1.5 text-xs rounded-xl border border-[#E6DFCC] bg-white text-[#13321F] font-medium"
+                className="px-2.5 py-1 text-xs rounded-lg border border-[#E6DFCC] bg-white text-[#13321F] font-medium focus:outline-none focus:border-[#E8A33D]"
               />
             </div>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="mt-6 pt-4 border-t border-[#E6DFCC]/60 flex items-center justify-end gap-3">
+        {/* Fixed Modal Footer */}
+        <div className="px-5 sm:px-6 py-3.5 border-t border-[#E6DFCC]/70 flex items-center justify-end gap-2.5 shrink-0 bg-white/95">
           <button
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="admin-pill-btn px-5 py-2.5 rounded-full border border-[#DED5C5] bg-white text-xs font-bold text-[#6B7A70] hover:text-[#13321F] hover:bg-[#F8F4EA] transition cursor-pointer"
+            className="px-4 py-2 rounded-full border border-[#DED5C5] bg-white text-xs font-bold text-[#6B7A70] hover:text-[#13321F] hover:bg-[#F8F4EA] transition cursor-pointer"
           >
             Cancel
           </button>
@@ -433,7 +462,7 @@ export function UploadModal({
             type="button"
             onClick={() => handleSubmit(true)}
             disabled={saving}
-            className="admin-pill-btn px-5 py-2.5 rounded-full border border-[#DED5C5] bg-[#F8F4EA] text-xs font-bold text-[#13321F] hover:bg-[#EBE3D5] transition cursor-pointer active:scale-95 disabled:opacity-50"
+            className="px-4 py-2 rounded-full border border-[#DED5C5] bg-[#F8F4EA] text-xs font-bold text-[#13321F] hover:bg-[#EBE3D5] transition cursor-pointer active:scale-95 disabled:opacity-50"
           >
             Save as draft
           </button>
@@ -442,7 +471,7 @@ export function UploadModal({
             type="button"
             onClick={() => handleSubmit(false)}
             disabled={saving}
-            className="admin-pill-btn inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#13321F] text-white text-xs sm:text-sm font-bold shadow-md hover:bg-[#1C4B3A] transition cursor-pointer active:scale-95 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-[#13321F] text-white text-xs sm:text-sm font-bold shadow-md hover:bg-[#1C4B3A] transition cursor-pointer active:scale-95 disabled:opacity-50"
           >
             {saving ? (
               <>
